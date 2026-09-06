@@ -762,26 +762,14 @@
       setInterval(cargar, 15000); // Recarga automática cada 15 segundos
     };
 
-    function abrirModalAdmin() {
-      document.getElementById("passAdminInput").value = "";
-      document.getElementById("msgErrorAdmin").style.display = "none";
-      document.getElementById("modalAdmin").classList.add("open");
-      setTimeout(() => document.getElementById("passAdminInput").focus(), 100);
-    }
+function abrirModalAdmin() {
+  // Abre directamente la página de administración
+  window.open("https://dge-fiunne.github.io/distribucion_aulas/admin.html", "_blank");
+}
 
     function cerrarModalAdmin() {
       document.getElementById("modalAdmin").classList.remove("open");
     }
-
-    function validarYRedirigirAdmin() {
-      const pass = document.getElementById("passAdminInput").value;
-      const msgError = document.getElementById("msgErrorAdmin");
-      
-      if (!pass) {
-        msgError.innerText = "Escribí la contraseña";
-        msgError.style.display = "block";
-        return;
-      }
 
       fetch(`${URL_WEB_APP}?action=verificarAdmin&pass=${encodeURIComponent(pass)}`)
         .then(response => response.json())
