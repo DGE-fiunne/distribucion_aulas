@@ -112,49 +112,22 @@
   .cat-container.visible { display:block; }
   @keyframes fadeIn { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
 
-  /* 🔒 MODAL DE LOGIN INICIAL */
-  #modalAuth {
-    z-index: 2000;
-    background: #0f172a;
-    backdrop-filter: blur(10px);
-  }
-  .auth-box {
-    background: #1e293b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 32px;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  }
+  #modalAuth { z-index: 2000; background: #0f172a; backdrop-filter: blur(10px); }
+  .auth-box { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 32px; width: 100%; max-width: 400px; text-align: center; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
   .auth-box h3 { color: white; margin-bottom: 8px; font-size: 20px; }
   .auth-box p { color: #94a3b8; font-size: 13px; margin-bottom: 20px; }
-  .auth-box input {
-    width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-    background: #111827; color: white; text-align: center; font-size: 15px; margin-bottom: 16px;
-    outline: none;
-  }
+  .auth-box input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #111827; color: white; text-align: center; font-size: 15px; margin-bottom: 16px; outline: none; }
   .auth-box input:focus { border-color: #22c55e; }
-  .auth-box button {
-    width: 100%; padding: 12px; border-radius: 10px; border: none; background: #22c55e;
-    color: #000; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;
-  }
+  .auth-box button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #22c55e; color: #000; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; }
   .auth-box button:hover { opacity: 0.9; }
   #msgErrorAuth { color: #ef4444; font-size: 12px; margin-bottom: 12px; display: none; }
 
   @media (max-width:900px) { .categorias-botones { grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:600px) { 
-    .main { padding:10px 14px; } 
-    .form-grid-2 { grid-template-columns:1fr; } 
-    .top-navbar { padding:10px 16px; }
-  }
+  @media (max-width:600px) { .main { padding:10px 14px; } .form-grid-2 { grid-template-columns:1fr; } .top-navbar { padding:10px 16px; } }
 </style>
 </head>
 <body>
 
-  <!-- 🔒 MODAL DE BLOQUEO Y AUTENTICACIÓN -->
   <div id="modalAuth" class="modal-overlay open">
     <div class="auth-box">
       <h3>⚙️ Acceso Restringido</h3>
@@ -170,7 +143,6 @@
       <img src="https://iili.io/ndEnhRj.md.png" class="brand-logo" alt="Logo">
       <span class="brand-title">Gestor de Aulas | Panel Administrativo</span>
     </div>
-
   </header>
 
   <div class="content-col">
@@ -181,7 +153,7 @@
           <button class="btn-cat cr" onclick="toggleCategoria('CLASE_REGULAR', this)"><span>CR</span> Clases Regulares</button>
           <button class="btn-cat ex" onclick="toggleCategoria('EXAMEN', this)"><span>EX</span> Exámenes</button>
           <button class="btn-cat cc" onclick="toggleCategoria('CONTRACURSADA', this)"><span>CC</span> Contracursadas</button>
-          <button class="btn-cat ev" onclick="toggleCategoria('EVENTO/CAPACITACIÓN', this)"><span>EV</span> Eventos/Cap.</button>
+          <button class="btn-cat ev" onclick="toggleCategoria('EVENTO', this)"><span>EV</span> Eventos/Cap.</button>
         </div>
 
         <!-- 📚 CLASES REGULARES -->
@@ -275,11 +247,11 @@
         </div>
 
         <!-- 🎯 EVENTOS -->
-        <div id="cont-EVENTO/CAPACITACIÓN" class="cat-container card">
+        <div id="cont-EVENTO" class="cat-container card">
           <div class="cat-header">
             <h3 style="color:var(--green);">🎯 Eventos/Capacitaciones</h3>
             <div style="display:flex; align-items:center; gap:10px;">
-              <button class="btn" style="background:var(--green); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('EVENTO/CAPACITACIÓN')">+ Nueva Asignación</button>
+              <button class="btn" style="background:var(--green); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('EVENTO')">+ Nueva Asignación</button>
               <div style="display:flex; align-items:center; gap:6px;">
                 <span style="font-size:11px; color:var(--ink-soft);">Ver usuarios:</span>
                 <label class="switch" onclick="event.stopPropagation()">
@@ -316,7 +288,7 @@
           <option value="CLASE_REGULAR">Clase Regular</option>
           <option value="EXAMEN">Examen</option>
           <option value="CONTRACURSADA">Contracursada</option>
-          <option value="EVENTO/CAPACITACIÓN">Evento/Capacitación</option>
+          <option value="EVENTO">Evento/Capacitación</option>
         </select>
       </div>
     </div>
@@ -366,7 +338,6 @@
 </div>
 
 <script>
-// ⚠️ REEMPLAZÁ ESTA URL CON TU WEB APP DESPLEGADA DESDE APPS SCRIPT
 const URL_API_ADMIN = "https://script.google.com/macros/s/AKfycbzRscYVMA2NNuk-pGybvKwaiSdf-aOS6Sn2Ao7v1C-AEJc4RYylBI09qykQO15_R1cK_A/exec";
 
 let todasLasAulas = [];
@@ -441,7 +412,8 @@ function cargarVisibilidadDesdeSheets() {
     "CLASE_REGULAR": "vis-CLASE_REGULAR",
     "EXAMEN": "vis-EXAMEN",
     "CONTRACURSADA": "vis-CONTRACURSADA",
-    "EVENTO/CAPACITACIÓN": "vis-EVENTO"
+    "EVENTO/CAPACITACIÓN": "vis-EVENTO",
+    "EVENTO": "vis-EVENTO"
   };
   fetch(`${URL_API_ADMIN}?action=obtenerConfigCategorias`)
     .then(res => res.json())
@@ -505,8 +477,7 @@ function crearFila(grupo) {
 }
 
 function toggleCategoria(catId, boton) {
-  const elId = catId.replace(/\//g, "\\/");
-  const contenedor = document.getElementById(`cont-${elId}`);
+  const contenedor = document.getElementById(`cont-${catId}`);
   if (!contenedor) return;
   const estaVisible = contenedor.classList.contains('visible');
   contenedor.classList.toggle('visible', !estaVisible);
@@ -524,7 +495,7 @@ function abrirModalFormPorCategoria(categoria) {
 
 function actualizarCamposSegunCategoria() {
   const categoria = document.getElementById('categoria').value;
-  const esEvento = categoria.includes("EVENTO");
+  const esEvento = categoria.startsWith("EVENTO");
   const esClaseRegular = categoria === "CLASE_REGULAR";
   document.getElementById('campoMateria').style.display = esEvento ? 'none' : 'block';
   document.getElementById('campoTituloEvento').classList.toggle('visible', esEvento);
@@ -611,7 +582,7 @@ function renderTablas() {
   const cr2 = agruparPorClave(todasLasAulas.filter(i => i.categoria === "CLASE_REGULAR" && i.cuatrimestre === "2"));
   const ex = agruparPorClave(todasLasAulas.filter(i => i.categoria === "EXAMEN"));
   const cc = agruparPorClave(todasLasAulas.filter(i => i.categoria === "CONTRACURSADA"));
-  const ev = agruparPorClave(todasLasAulas.filter(i => i.categoria === "EVENTO/CAPACITACIÓN"));
+  const ev = agruparPorClave(todasLasAulas.filter(i => i.categoria.startsWith("EVENTO")));
 
   document.getElementById('tablaCuatri1').innerHTML = cr1.length ? cr1.map(crearFila).join("") : filaVacia("Sin asignaciones");
   document.getElementById('tablaCuatri2').innerHTML = cr2.length ? cr2.map(crearFila).join("") : filaVacia("Sin asignaciones");
@@ -623,11 +594,13 @@ function renderTablas() {
 function guardar() {
   const id = document.getElementById('idEditar').value || "";
   const dia = document.getElementById('dia').value;
-  const categoria = document.getElementById('categoria').value;
+  let categoria = document.getElementById('categoria').value;
+  if (categoria === "EVENTO") categoria = "EVENTO/CAPACITACIÓN";
+  
   const edificio = document.getElementById('edificio').value;
   const cuatrimestre = document.getElementById('cuatrimestre') ? document.getElementById('cuatrimestre').value : "1";
   
-  let materia = (categoria === "EVENTO/CAPACITACIÓN") ? document.getElementById('tituloEvento').value.trim() : document.getElementById('materia').value;
+  let materia = (categoria.startsWith("EVENTO")) ? document.getElementById('tituloEvento').value.trim() : document.getElementById('materia').value;
   if (!materia) return alert("Escribí o seleccioná una materia/evento");
 
   const aulas = Array.from(document.querySelectorAll('.aula-in')).map(i => i.value.trim()).filter(Boolean);
