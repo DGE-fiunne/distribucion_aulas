@@ -414,8 +414,9 @@ function cambiarCuatrimestre() {
 
   fetch(URL_API_ADMIN, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "guardarCuatri", valor: cuatrimestreActivo })
-  });
+  }).catch(err => console.error("Error al guardar cuatrimestre:", err));
   
   renderTablas();
 }
@@ -459,6 +460,7 @@ function cargarVisibilidadDesdeSheets() {
 function guardarVisibilidadCategoria(categoria, visible) {
   fetch(URL_API_ADMIN, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "guardarVisibilidad", categoria, visible })
   });
 }
@@ -574,16 +576,12 @@ function addHorario() {
 }
 
 function cargarListas() {
-  // 1. Cargar lista de Materias y Carreras
   fetch(`${URL_API_ADMIN}?action=obtenerMaterias`)
     .then(res => res.json())
     .then(materias => {
       listaMateriasCompleta = materias || [];
-      
-      // Extraer carreras únicas
       const carreras = [...new Set(listaMateriasCompleta.map(m => m.carrera).filter(Boolean))].sort();
       
-      // Poblar TODOS los selectores de carrera (Filtros de tarjetas y Modal)
       document.querySelectorAll('.select-carreras-filter').forEach(sel => {
         const valActual = sel.value;
         sel.innerHTML = '<option value="TODOS">Todas las carreras</option>';
@@ -601,7 +599,6 @@ function cargarListas() {
     })
     .catch(err => console.error("Error al cargar materias:", err));
 
-  // 2. Cargar lista de Edificios
   fetch(`${URL_API_ADMIN}?action=obtenerEdificios`)
     .then(res => res.json())
     .then(edificios => {
@@ -652,7 +649,6 @@ function filtrarItemPorFiltros(item, fDia, fCar, fEdif) {
 function renderTablas() {
   if (!todasLasAulas.length) return;
 
-  // 1. CLASES REGULARES
   const fDiaCR = document.getElementById('filter-dia-CLASE_REGULAR')?.value || "TODOS";
   const fCarCR = document.getElementById('filter-carrera-CLASE_REGULAR')?.value || "TODOS";
   const fEdCR  = document.getElementById('filter-edificio-CLASE_REGULAR')?.value || "TODOS";
@@ -664,7 +660,6 @@ function renderTablas() {
   const cr1 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "1"));
   const cr2 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "2"));
 
-  // 2. EXÁMENES
   const fDiaEX = document.getElementById('filter-dia-EXAMEN')?.value || "TODOS";
   const fCarEX = document.getElementById('filter-carrera-EXAMEN')?.value || "TODOS";
   const fEdEX  = document.getElementById('filter-edificio-EXAMEN')?.value || "TODOS";
@@ -674,7 +669,6 @@ function renderTablas() {
   );
   const ex = agruparPorClave(exFiltrados);
 
-  // 3. CONTRACURSADAS
   const fDiaCC = document.getElementById('filter-dia-CONTRACURSADA')?.value || "TODOS";
   const fCarCC = document.getElementById('filter-carrera-CONTRACURSADA')?.value || "TODOS";
   const fEdCC  = document.getElementById('filter-edificio-CONTRACURSADA')?.value || "TODOS";
@@ -684,7 +678,6 @@ function renderTablas() {
   );
   const cc = agruparPorClave(ccFiltradas);
 
-  // 4. EVENTOS
   const fDiaEV = document.getElementById('filter-dia-EVENTO')?.value || "TODOS";
   const fEdEV  = document.getElementById('filter-edificio-EVENTO')?.value || "TODOS";
 
@@ -693,7 +686,6 @@ function renderTablas() {
   );
   const ev = agruparPorClave(evFiltrados);
 
-  // RENDERIZAR VISTAS
   document.getElementById('tablaCuatri1').innerHTML = cr1.length ? cr1.map(crearFila).join("") : filaVacia("Sin asignaciones");
   document.getElementById('tablaCuatri2').innerHTML = cr2.length ? cr2.map(crearFila).join("") : filaVacia("Sin asignaciones");
   document.getElementById('tablaExamenes').innerHTML = ex.length ? ex.map(crearFila).join("") : filaVacia("Sin exámenes");
@@ -701,7 +693,7 @@ function renderTablas() {
   document.getElementById('tablaEventos').innerHTML = ev.length ? ev.map(crearFila).join("") : filaVacia("Sin eventos");
 }
 
- function prepararEdicion(id) {
+function prepararEdicion(id) {
   id = String(id).trim();
   const base = todasLasAulas.find(x => String(x.id).trim() === id);
   if (!base) return alert("Registro no encontrado");
@@ -727,77 +719,52 @@ function renderTablas() {
     }, 50);
   }
 
-  // Poblar Aulas
+  // Cargar Aulas limpiamente
   const contenedorAulas = document.getElementById('cont-aulas');
   contenedorAulas.innerHTML = `<label class="field-label">Aula(s)</label>`;
 
   let textoAulas = base.aula || "";
-  let listaAulas = [];
-  if (textoAulas.indexOf(" - ") !== -1) {
-    listaAulas = textoAulas.split(" - ");
-  } else if (textoAulas.trim() !== "") {
-    listaAulas = [textoAulas];
-  } else {
-    listaAulas = [""];
-  }
+  let listaAulas = textoAulas.includes(" - ") ? textoAulas.split(" - ") : (textoAulas.trim() ? [textoAulas] : [""]);
 
-  listaAulas.forEach(function(aula) {
-    aula = aula.trim();
-    const fila = document.createElement('div');
-    fila.className = 'aula-row';
-    fila.innerHTML = `<input class="aula-in" value="${aula.replace(/"/g, '&quot;')}" placeholder="Ej: 101" style="flex:1;">` +
-      `<button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
-    contenedorAulas.appendChild(fila);
+  listaAulas.forEach((aula, idx) => {
+    const div = document.createElement('div');
+    div.className = 'aula-row';
+    if (idx === 0) {
+      div.innerHTML = `<input class="aula-in" value="${aula.trim().replace(/"/g, '&quot;')}" placeholder="Ej: 101" style="flex:1;"><button class="btn" onclick="addAula()">+ Agregar</button>`;
+    } else {
+      div.innerHTML = `<input class="aula-in" value="${aula.trim().replace(/"/g, '&quot;')}" placeholder="Ej: 101" style="flex:1;"><button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+    }
+    contenedorAulas.appendChild(div);
   });
 
-  const filaBtn = document.createElement('div');
-  filaBtn.className = 'aula-row';
-  filaBtn.innerHTML = `<button class="btn" onclick="addAula()">+ Agregar Aula</button>`;
-  contenedorAulas.appendChild(filaBtn);
-
-  // Poblar Horarios
+  // Cargar Horarios limpiamente
   const contenedorHorarios = document.getElementById('cont-horarios');
   contenedorHorarios.innerHTML = "";
 
   let textoInicio = base.horarioInicio || "";
   let textoFin = base.horarioFin || "";
-  let listaInicio = [], listaFin = [];
-
-  if (textoInicio.indexOf(" | ") !== -1) {
-    listaInicio = textoInicio.split(" | ");
-    listaFin = textoFin.split(" | ");
-  } else if (textoInicio.trim() !== "") {
-    listaInicio = [textoInicio];
-    listaFin = [textoFin];
-  } else {
-    listaInicio = [""];
-    listaFin = [""];
-  }
+  let listaInicio = textoInicio.includes(" | ") ? textoInicio.split(" | ") : (textoInicio.trim() ? [textoInicio] : [""]);
+  let listaFin = textoFin.includes(" | ") ? textoFin.split(" | ") : (textoFin.trim() ? [textoFin] : [""]);
 
   const maxFilas = Math.max(listaInicio.length, listaFin.length);
   for (let i = 0; i < maxFilas; i++) {
     const hi = (listaInicio[i] || "").trim();
     const hf = (listaFin[i] || "").trim();
-    const filaH = document.createElement('div');
-    filaH.className = 'horario-row';
-    filaH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;">` +
-      `<span>-</span>` +
-      `<input type="time" class="horario-fin" value="${hf}" style="flex:1;">` +
-      `<button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
-    contenedorHorarios.appendChild(filaH);
+    const divH = document.createElement('div');
+    divH.className = 'horario-row';
+    if (i === 0) {
+      divH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;"><span>-</span><input type="time" class="horario-fin" value="${hf}" style="flex:1;"><button class="btn" onclick="addHorario()">+ Horario</button>`;
+    } else {
+      divH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;"><span>-</span><input type="time" class="horario-fin" value="${hf}" style="flex:1;"><button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+    }
+    contenedorHorarios.appendChild(divH);
   }
-
-  const filaBtnH = document.createElement('div');
-  filaBtnH.className = 'horario-row';
-  filaBtnH.innerHTML = `<button class="btn" onclick="addHorario()">+ Agregar Horario</button>`;
-  contenedorHorarios.appendChild(filaBtnH);
 
   actualizarCamposSegunCategoria();
   document.getElementById('modalFormTitulo').innerText = 'Editar Asignación';
   document.getElementById('modalForm').classList.add('open');
 }
 
- 
 function guardar() {
   const id = document.getElementById('idEditar').value || "";
   const dia = document.getElementById('dia').value;
@@ -810,12 +777,8 @@ function guardar() {
   let materia = (categoria.startsWith("EVENTO")) ? document.getElementById('tituloEvento').value.trim() : document.getElementById('materia').value;
   if (!materia) return alert("Escribí o seleccioná una materia/evento");
 
-  // Capturar todas las aulas agregadas
-  const aulas = Array.from(document.querySelectorAll('.aula-in'))
-    .map(i => i.value.trim())
-    .filter(Boolean);
+  const aulas = Array.from(document.querySelectorAll('.aula-in')).map(i => i.value.trim()).filter(Boolean);
 
-  // Capturar TODOS los bloques de horarios
   const listaHorariosInicio = [];
   const listaHorariosFin = [];
 
@@ -831,27 +794,22 @@ function guardar() {
   if (!aulas.length) return alert("Agregá al menos un aula");
   if (!listaHorariosInicio.length) return alert("Agregá al menos un horario");
 
-  // Unir múltiples horarios en strings separados por " | "
   const horarioInicioStr = listaHorariosInicio.join(" | ");
   const horarioFinStr = listaHorariosFin.join(" | ");
 
+  const payload = {
+    action: "guardarMateria",
+    id, dia, materia, edificio, aulas,
+    horarios: [{ inicio: horarioInicioStr, fin: horarioFinStr }],
+    horarioInicio: horarioInicioStr,
+    horarioFin: horarioFinStr,
+    categoria, colores: [], esOcupada: false, cuatrimestre
+  };
+
   fetch(URL_API_ADMIN, {
     method: "POST",
-    body: JSON.stringify({
-      action: "guardarMateria",
-      id, 
-      dia, 
-      materia, 
-      edificio, 
-      aulas, 
-      horarios: [{ inicio: horarioInicioStr, fin: horarioFinStr }], 
-      horarioInicio: horarioInicioStr,
-      horarioFin: horarioFinStr,
-      categoria, 
-      colores: [], 
-      esOcupada: false, 
-      cuatrimestre
-    })
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
   })
   .then(res => res.json())
   .then(() => {
@@ -867,6 +825,7 @@ function eliminarGrupo(ids) {
   const listaIds = String(ids).split(",");
   fetch(URL_API_ADMIN, {
     method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "eliminarMateria", ids: listaIds })
   })
   .then(res => res.json())
