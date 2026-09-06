@@ -548,22 +548,55 @@ function addHorario() {
 }
 
 function cargarListas() {
+  // 1. Cargar lista de Materias y Carreras
   fetch(`${URL_API_ADMIN}?action=obtenerMaterias`)
     .then(res => res.json())
     .then(materias => {
       listaMateriasCompleta = materias || [];
-      filtrarMateriasPorCuatrimestre();
-    });
+      
+      // Extraer carreras únicas
+      const carreras = [...new Set(listaMateriasCompleta.map(m => m.carrera).filter(Boolean))].sort();
+      
+      // Poblar TODOS los selectores de carrera (Filtros de tarjetas y Modal)
+      document.querySelectorAll('.select-carreras-filter').forEach(sel => {
+        const valActual = sel.value;
+        sel.innerHTML = '<option value="TODOS">Todas las carreras</option>';
+        carreras.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+        if (carreras.includes(valActual)) sel.value = valActual;
+      });
 
+      const selectCarreraModal = document.getElementById('carrera');
+      if (selectCarreraModal) {
+        selectCarreraModal.innerHTML = '<option value="TODAS">Todas las carreras</option>';
+        carreras.forEach(c => selectCarreraModal.innerHTML += `<option value="${c}">${c}</option>`);
+      }
+
+      filtrarMateriasPorCuatrimestre();
+    })
+    .catch(err => console.error("Error al cargar materias:", err));
+
+  // 2. Cargar lista de Edificios
   fetch(`${URL_API_ADMIN}?action=obtenerEdificios`)
     .then(res => res.json())
     .then(edificios => {
-      if (edificios) {
+      if (edificios && edificios.length > 0) {
+        // Modal de formulario
         const s = document.getElementById('edificio');
-        s.innerHTML = "";
-        edificios.forEach(e => s.innerHTML += `<option>${e}</option>`);
+        if (s) {
+          s.innerHTML = "";
+          edificios.forEach(e => s.innerHTML += `<option>${e}</option>`);
+        }
+        
+        // Poblar TODOS los selectores de edificio de las tarjetas
+        document.querySelectorAll('.select-edificios-filter').forEach(sel => {
+          const valActual = sel.value;
+          sel.innerHTML = '<option value="TODOS">Todos los edificios</option>';
+          edificios.forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
+          if (edificios.includes(valActual)) sel.value = valActual;
+        });
       }
-    });
+    })
+    .catch(err => console.error("Error al cargar edificios:", err));
 }
 
 function actualizarDatos() {
