@@ -219,6 +219,15 @@
               </div>
             </div>
           </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-EXAMEN" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-carrera-EXAMEN" class="select-carreras-filter" onchange="renderTablas()"><option value="TODOS">Todas las carreras</option></select>
+            <select id="filter-edificio-EXAMEN" class="select-edificios-filter" onchange="renderTablas()"><option value="TODOS">Todos los edificios</option></select>
+          </div>
           <div class="table-wrap">
             <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
             <tbody id="tablaExamenes"></tbody></table>
@@ -240,6 +249,15 @@
               </div>
             </div>
           </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-CONTRACURSADA" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-carrera-CONTRACURSADA" class="select-carreras-filter" onchange="renderTablas()"><option value="TODOS">Todas las carreras</option></select>
+            <select id="filter-edificio-CONTRACURSADA" class="select-edificios-filter" onchange="renderTablas()"><option value="TODOS">Todos los edificios</option></select>
+          </div>
           <div class="table-wrap">
             <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
             <tbody id="tablaContracursadas"></tbody></table>
@@ -260,6 +278,14 @@
                 </label>
               </div>
             </div>
+          </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-EVENTO" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-edificio-EVENTO" class="select-edificios-filter" onchange="renderTablas()"><option value="TODOS">Todos los edificios</option></select>
           </div>
           <div class="table-wrap">
             <table><thead><tr><th>Día</th><th>Evento</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
@@ -580,14 +606,12 @@ function cargarListas() {
     .then(res => res.json())
     .then(edificios => {
       if (edificios && edificios.length > 0) {
-        // Modal de formulario
         const s = document.getElementById('edificio');
         if (s) {
           s.innerHTML = "";
           edificios.forEach(e => s.innerHTML += `<option>${e}</option>`);
         }
         
-        // Poblar TODOS los selectores de edificio de las tarjetas
         document.querySelectorAll('.select-edificios-filter').forEach(sel => {
           const valActual = sel.value;
           sel.innerHTML = '<option value="TODOS">Todos los edificios</option>';
@@ -608,15 +632,68 @@ function actualizarDatos() {
     });
 }
 
+function filtrarItemPorFiltros(item, fDia, fCar, fEdif) {
+  const diaOk = (fDia === "TODOS" || item.dia === fDia);
+  const edifOk = (fEdif === "TODOS" || item.edificio === fEdif);
+  
+  let carOk = true;
+  if (fCar && fCar !== "TODOS") {
+    let carreraItem = item.carrera;
+    if (!carreraItem) {
+      const matObj = listaMateriasCompleta.find(m => m.nombre.trim().toLowerCase() === String(item.materia).trim().toLowerCase());
+      if (matObj) carreraItem = matObj.carrera;
+    }
+    carOk = (carreraItem === fCar);
+  }
+  
+  return diaOk && edifOk && carOk;
+}
+
 function renderTablas() {
   if (!todasLasAulas.length) return;
 
-  const cr1 = agruparPorClave(todasLasAulas.filter(i => i.categoria === "CLASE_REGULAR" && i.cuatrimestre === "1"));
-  const cr2 = agruparPorClave(todasLasAulas.filter(i => i.categoria === "CLASE_REGULAR" && i.cuatrimestre === "2"));
-  const ex = agruparPorClave(todasLasAulas.filter(i => i.categoria === "EXAMEN"));
-  const cc = agruparPorClave(todasLasAulas.filter(i => i.categoria === "CONTRACURSADA"));
-  const ev = agruparPorClave(todasLasAulas.filter(i => i.categoria.startsWith("EVENTO")));
+  // 1. CLASES REGULARES
+  const fDiaCR = document.getElementById('filter-dia-CLASE_REGULAR')?.value || "TODOS";
+  const fCarCR = document.getElementById('filter-carrera-CLASE_REGULAR')?.value || "TODOS";
+  const fEdCR  = document.getElementById('filter-edificio-CLASE_REGULAR')?.value || "TODOS";
 
+  const crFiltradas = todasLasAulas.filter(i => 
+    i.categoria === "CLASE_REGULAR" && filtrarItemPorFiltros(i, fDiaCR, fCarCR, fEdCR)
+  );
+
+  const cr1 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "1"));
+  const cr2 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "2"));
+
+  // 2. EXÁMENES
+  const fDiaEX = document.getElementById('filter-dia-EXAMEN')?.value || "TODOS";
+  const fCarEX = document.getElementById('filter-carrera-EXAMEN')?.value || "TODOS";
+  const fEdEX  = document.getElementById('filter-edificio-EXAMEN')?.value || "TODOS";
+
+  const exFiltrados = todasLasAulas.filter(i => 
+    i.categoria === "EXAMEN" && filtrarItemPorFiltros(i, fDiaEX, fCarEX, fEdEX)
+  );
+  const ex = agruparPorClave(exFiltrados);
+
+  // 3. CONTRACURSADAS
+  const fDiaCC = document.getElementById('filter-dia-CONTRACURSADA')?.value || "TODOS";
+  const fCarCC = document.getElementById('filter-carrera-CONTRACURSADA')?.value || "TODOS";
+  const fEdCC  = document.getElementById('filter-edificio-CONTRACURSADA')?.value || "TODOS";
+
+  const ccFiltradas = todasLasAulas.filter(i => 
+    i.categoria === "CONTRACURSADA" && filtrarItemPorFiltros(i, fDiaCC, fCarCC, fEdCC)
+  );
+  const cc = agruparPorClave(ccFiltradas);
+
+  // 4. EVENTOS
+  const fDiaEV = document.getElementById('filter-dia-EVENTO')?.value || "TODOS";
+  const fEdEV  = document.getElementById('filter-edificio-EVENTO')?.value || "TODOS";
+
+  const evFiltrados = todasLasAulas.filter(i => 
+    i.categoria.startsWith("EVENTO") && filtrarItemPorFiltros(i, fDiaEV, "TODOS", fEdEV)
+  );
+  const ev = agruparPorClave(evFiltrados);
+
+  // RENDERIZAR VISTAS
   document.getElementById('tablaCuatri1').innerHTML = cr1.length ? cr1.map(crearFila).join("") : filaVacia("Sin asignaciones");
   document.getElementById('tablaCuatri2').innerHTML = cr2.length ? cr2.map(crearFila).join("") : filaVacia("Sin asignaciones");
   document.getElementById('tablaExamenes').innerHTML = ex.length ? ex.map(crearFila).join("") : filaVacia("Sin exámenes");
