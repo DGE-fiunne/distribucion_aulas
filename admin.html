@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  :root {
+    --bg:#F3F3FA; --surface:#FFFFFF; --ink:#1B1D28; --ink-soft:#6E7191; --ink-faint:#A0A3BD;
+    --line:#ECEDF6; --line-soft:#F4F4FA;
+    --purple:#F59127; --purple-dark:#003441; --purple-soft:#EFECFC;
+    --amber:#FFA800; --amber-soft:#FFF3E0;
+    --teal:#2FC3D2; --teal-soft:#E2F8FA;
+    --green:#2ED47A; --green-soft:#E3FBEF;
+    --red:#FF5C7C; --red-soft:#FFEAF0;
+    --radius:20px; --radius-sm:12px;
+    --shadow: 0 1px 2px rgba(30,20,80,.03), 0 16px 32px -20px rgba(30,20,80,.16);
+    --font-display:'Poppins',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+  }
+  body { margin:0; font-family:var(--font-body); color:var(--ink); background:var(--bg); }
+  h1,h2,h3 { font-family:var(--font-display); letter-spacing:-.01em; color:var(--ink); margin:0; }
+  
+  .top-navbar {
+    position: sticky; top: 0; z-index: 300;
+    background: linear-gradient(135deg, #003441 0%, #003441 100%);
+    color: white; padding: 10px 2.5%;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 20px -5px rgba(30,20,80,.3);
+  }
+  .brand-container { display: flex; align-items: center; gap: 12px; }
+  .brand-logo { width: 60%; height: 50%; border-radius: 10px; object-fit: cover; }
+  .brand-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; line-height: 1.2; color: white; }
+  .navbar-nav { display: flex; gap: 8px; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.1);
+    border: none; color: white; padding: 8px 16px; border-radius: 12px;
+    font-weight: 600; font-size: 12px; cursor: pointer; transition: .15s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,.2); }
+  .nav-btn.active { background: white; color: var(--purple-dark); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+
+  .content-col { min-width:0; }
+  .topbar { display:flex; align-items:center; gap:14px; background:var(--bg); padding:18px 2.5% 0; height:40px; }
+  .topbar-title { font-family:var(--font-display); font-weight:600; font-size:13.5px; color:var(--ink-faint); }
+  .main { padding:14px 16px 60px; max-width: 95%; margin:0 auto; }
+  .card { background:var(--surface); padding:24px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; border:1px solid var(--line); }
+  .categorias-botones { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; }
+  .btn-cat { padding:14px 16px; border:none; border-radius:var(--radius-sm); font-family:var(--font-display); font-weight:600; font-size:14px; cursor:pointer; transition:.2s; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 16px -8px rgba(0,0,0,.25); }
+  .btn-cat.cr { background:var(--purple-soft); color:var(--purple-dark); }
+  .btn-cat.cr:hover, .btn-cat.cr.active { background:var(--purple); color:white; }
+  .btn-cat.ex { background:var(--amber-soft); color:#B37400; }
+  .btn-cat.ex:hover, .btn-cat.ex.active { background:var(--amber); color:white; }
+  .btn-cat.cc { background:var(--teal-soft); color:#0F8896; }
+  .btn-cat.cc:hover, .btn-cat.cc.active { background:var(--teal); color:white; }
+  .btn-cat.ev { background:var(--green-soft); color:#1EA862; }
+  .btn-cat.ev:hover, .btn-cat.ev.active { background:var(--green); color:white; }
+  .cat-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:12px; }
+  .cat-header h3 { font-size:16px; font-weight:700; }
+  .cat-filter-bar { display:flex; gap:10px; align-items:center; background:var(--line-soft); padding:8px 12px; border-radius:var(--radius-sm); margin-bottom:12px; flex-wrap:wrap; }
+  .cat-filter-bar label { font-size:11.5px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:6px; }
+  .cat-filter-bar select { width:auto; padding:5px 10px; font-size:12px; height:32px; border-radius:8px; background:white; }
+  .form-section-label { font-family:var(--font-mono); font-size:10.5px; font-weight:600; color:var(--purple); text-transform:uppercase; letter-spacing:.08em; margin:14px 0 12px; display:flex; align-items:center; gap:8px; }
+  .form-section-label::after { content:""; flex:1; height:1px; background:var(--line); }
+  .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+  label.field-label { display:block; font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  input, select { padding:11px 13px; border:1.5px solid var(--line); border-radius:var(--radius-sm); width:100%; font-size:13.5px; font-family:var(--font-body); color:var(--ink); background:var(--surface); transition:.15s; }
+  input:focus, select:focus { outline:none; border-color:var(--purple); box-shadow:0 0 0 3px var(--purple-soft); }
+  .btn { padding:9px 14px; border:1.5px solid transparent; border-radius:var(--radius-sm); cursor:pointer; font-weight:600; font-size:12.5px; transition:.15s; display:inline-flex; align-items:center; gap:6px; }
+  .btn-save { background:var(--purple); color:white; flex:1; padding:13px; font-size:14px; justify-content:center; }
+  .btn-save:hover { background:var(--purple-dark); }
+  .btn-cancel { background:var(--surface); color:var(--ink-soft); border-color:var(--line); padding:13px 18px; font-size:14px; }
+  .btn-edit { background:var(--purple-soft); color:var(--purple-dark); margin-right:5px; }
+  .btn-del { background:var(--red-soft); color:var(--red); }
+  .btn-row { display:flex; gap:8px; margin-top:16px; }
+  .subcuatri { margin-bottom:20px; padding-bottom:10px; border-bottom:1px dashed var(--line); transition:opacity .2s; }
+  .subcuatri.oculto { display:none; }
+  .subcuatri h4 { font-size:14px; font-weight:600; margin:8px 0; }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; margin-top:4px; }
+  th { text-align:left; padding:10px 12px; background:var(--line-soft); font-family:var(--font-mono); font-size:10.5px; font-weight:600; color:var(--ink-faint); text-transform:uppercase; border-bottom:1.5px solid var(--line); }
+  td { padding:12px 12px; border-bottom:1px solid var(--line-soft); font-size:13px; vertical-align:middle; }
+  .empty-row td { text-align:center; color:var(--ink-faint); padding:30px 12px; }
+  .seccion { display:none; }
+  .active-sec { display:block; }
+
+  .switch { position:relative; display:inline-block; width:40px; height:22px; }
+  .switch input { opacity:0; width:0; height:0; }
+  .switch .slider { position:absolute; cursor:pointer; inset:0; background:var(--red); transition:.3s; border-radius:34px; }
+  .switch .slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:white; transition:.3s; border-radius:50%; }
+  .switch input:checked + .slider { background:var(--green); }
+  .switch input:checked + .slider:before { transform:translateX(18px); }
+
+  .switch-cuatri { position:relative; display:inline-flex; width:72px; height:32px; background:var(--line); border-radius:16px; cursor:pointer; user-select:none; overflow:hidden; }
+  .switch-cuatri .op1, .switch-cuatri .op2 { position:absolute; top:0; bottom:0; display:flex; align-items:center; justify-content:center; width:50%; font-weight:700; font-size:13px; transition:.2s; z-index:1; }
+  .switch-cuatri .op1 { left:0; color:white; }
+  .switch-cuatri .op2 { right:0; color:var(--ink-soft); }
+  .switch-cuatri .puntero { position:absolute; top:3px; left:3px; width:33px; height:26px; background:var(--purple); border-radius:13px; transition:.25s ease; z-index:2; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+  .switch-cuatri.cuatri2 .puntero { transform:translateX(36px); }
+  .switch-cuatri.cuatri2 .op1 { color:var(--ink-soft); }
+  .switch-cuatri.cuatri2 .op2 { color:white; }
+
+  .estado-guardado { font-size:11px; color:var(--green); margin-left:6px; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(25,18,55,.5); backdrop-filter:blur(2px); z-index:999; align-items:center; justify-content:center; padding:16px; }
+  .modal-overlay.open { display:flex; }
+  .modal-box { background:var(--surface); border-radius:22px; padding:26px; width:100%; max-width:620px; max-height:88vh; overflow-y:auto; }
+  .modal-close-x { background:var(--line-soft); border:none; color:var(--ink-soft); cursor:pointer; width:32px; height:32px; border-radius:10px; }
+  .aula-row, .horario-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
+  #campoTituloEvento { display:none; margin-bottom:12px; }
+  #campoTituloEvento.visible { display:block; }
+  #campoCuatrimestre { display:none; margin-bottom:12px; }
+  #campoCuatrimestre.visible { display:block; }
+  .cat-container { display:none; animation:fadeIn .2s ease-in; }
+  .cat-container.visible { display:block; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
+  @media (max-width:900px) { .categorias-botones { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px) { 
+    .main { padding:10px 14px; } 
+    .form-grid-2 { grid-template-columns:1fr; } 
+    .top-navbar { padding:10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+  <header class="top-navbar">
+    <div class="brand-container">
+      <img src="https://iili.io/ndEnhRj.md.png" class="brand-logo" alt="Logo">
+      <span class="brand-title">Gestor de Aulas | Panel Administrativo</span>
+    </div>
+    <nav class="navbar-nav">
+      <button class="nav-btn active">Gestionar</button>
+    </nav>
+  </header>
+
+  <div class="content-col">
+    <div class="topbar"><span class="topbar-title"></span></div>
+    <div class="main">
+      <div id="sec-gestionar" class="seccion active-sec">
+        
+        <div class="categorias-botones">
+          <button class="btn-cat cr" onclick="toggleCategoria('CLASE_REGULAR', this)"><span>CR</span> Clases Regulares</button>
+          <button class="btn-cat ex" onclick="toggleCategoria('EXAMEN', this)"><span>EX</span> Exámenes</button>
+          <button class="btn-cat cc" onclick="toggleCategoria('CONTRACURSADA', this)"><span>CC</span> Contracursadas</button>
+          <button class="btn-cat ev" onclick="toggleCategoria('EVENTO/CAPACITACIÓN', this)"><span>EV</span> Eventos/Cap.</button>
+        </div>
+
+        <!-- 📚 CLASES REGULARES -->
+        <div id="cont-CLASE_REGULAR" class="cat-container card">
+          <div class="cat-header">
+            <h3 style="color:var(--purple);">📚 Clases Regulares</h3>
+            <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:11px; color:var(--ink-soft);">Cuatrimestre:</span>
+                <div id="swCuatri" class="switch-cuatri" onclick="cambiarCuatrimestre()">
+                  <span class="op1">1</span>
+                  <span class="op2">2</span>
+                  <div class="puntero"></div>
+                </div>
+                <span id="estadoCuatri" class="estado-guardado"></span>
+              </div>
+              <button class="btn" style="background:var(--purple); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('CLASE_REGULAR')">+ Nueva Asignación</button>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:11px; color:var(--ink-soft);">Ver usuarios:</span>
+                <label class="switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="vis-CLASE_REGULAR" onchange="guardarVisibilidadCategoria('CLASE_REGULAR', this.checked)" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-CLASE_REGULAR" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-carrera-CLASE_REGULAR" class="select-carreras-filter" onchange="renderTablas()">
+              <option value="TODOS">Todas las carreras</option>
+            </select>
+            <select id="filter-edificio-CLASE_REGULAR" class="select-edificios-filter" onchange="renderTablas()">
+              <option value="TODOS">Todos los edificios</option>
+            </select>
+          </div>
+          <div id="cuatri1-section" class="subcuatri">
+            <h4 style="color:var(--purple);">📗 1er Cuatrimestre</h4>
+            <div class="table-wrap">
+              <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
+              <tbody id="tablaCuatri1"></tbody></table>
+            </div>
+          </div>
+          <div id="cuatri2-section" class="subcuatri oculto">
+            <h4 style="color:var(--purple-dark);">📘 2do Cuatrimestre</h4>
+            <div class="table-wrap">
+              <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
+              <tbody id="tablaCuatri2"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 📝 EXÁMENES -->
+        <div id="cont-EXAMEN" class="cat-container card">
+          <div class="cat-header">
+            <h3 style="color:var(--amber);">📝 Exámenes</h3>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="btn" style="background:var(--amber); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('EXAMEN')">+ Nueva Asignación</button>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:11px; color:var(--ink-soft);">Ver usuarios:</span>
+                <label class="switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="vis-EXAMEN" onchange="guardarVisibilidadCategoria('EXAMEN', this.checked)" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-EXAMEN" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-carrera-EXAMEN" class="select-carreras-filter" onchange="renderTablas()">
+              <option value="TODOS">Todas las carreras</option>
+            </select>
+            <select id="filter-edificio-EXAMEN" class="select-edificios-filter" onchange="renderTablas()">
+              <option value="TODOS">Todos los edificios</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
+            <tbody id="tablaExamenes"></tbody></table>
+          </div>
+        </div>
+
+        <!-- 🔄 CONTRACURSADAS -->
+        <div id="cont-CONTRACURSADA" class="cat-container card">
+          <div class="cat-header">
+            <h3 style="color:var(--teal);">🔄 Contracursadas</h3>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="btn" style="background:var(--teal); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('CONTRACURSADA')">+ Nueva Asignación</button>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:11px; color:var(--ink-soft);">Ver usuarios:</span>
+                <label class="switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="vis-CONTRACURSADA" onchange="guardarVisibilidadCategoria('CONTRACURSADA', this.checked)" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="cat-filter-bar">
+            <label>🔍 Filtrar:</label>
+            <select id="filter-dia-CONTRACURSADA" onchange="renderTablas()">
+              <option value="TODOS">Todos los días</option>
+              <option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option>
+            </select>
+            <select id="filter-carrera-CONTRACURSADA" class="select-carreras-filter" onchange="renderTablas()">
+              <option value="TODOS">Todas las carreras</option>
+            </select>
+            <select id="filter-edificio-CONTRACURSADA" class="select-edificios-filter" onchange="renderTablas()">
+              <option value="TODOS">Todos los edificios</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Día</th><th>Materia</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
+            <tbody id="tablaContracursadas"></tbody></table>
+          </div>
+        </div>
+
+        <!-- 🎯 EVENTOS -->
+        <div id="cont-EVENTO/CAPACITACIÓN" class="cat-container card">
+          <div class="cat-header">
+            <h3 style="color:var(--green);">🎯 Eventos/Capacitaciones</h3>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <button class="btn" style="background:var(--green); color:white; padding:6px 12px; font-size:12px; border-radius:10px;" onclick="abrirModalFormPorCategoria('EVENTO/CAPACITACIÓN')">+ Nueva Asignación</button>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:11px; color:var(--ink-soft);">Ver usuarios:</span>
+                <label class="switch" onclick="event.stopPropagation()">
+                  <input type="checkbox" id="vis-EVENTO" onchange="guardarVisibilidadCategoria('EVENTO/CAPACITACIÓN', this.checked)" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Día</th><th>Evento</th><th>Aula(s)</th><th>Horario(s)</th><th>Edificio</th><th>Acciones</th></tr></thead>
+            <tbody id="tablaEventos"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- MODAL FORMULARIO -->
+<div id="modalForm" class="modal-overlay" onclick="if(event.target.id==='modalForm')cerrarModalForm()">
+  <div class="modal-box">
+    <div class="modal-form-head">
+      <h3 id="modalFormTitulo">Nueva Asignación</h3>
+      <button class="modal-close-x" onclick="cerrarModalForm()">✕</button>
+    </div>
+    <input type="hidden" id="idEditar">
+    <p class="form-section-label">Datos de la asignación</p>
+    <div class="form-grid-2">
+      <div><label class="field-label">Día</label>
+        <select id="dia"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option><option>Viernes</option><option>Sábado</option></select>
+      </div>
+      <div><label class="field-label">Categoría</label>
+        <select id="categoria" onchange="actualizarCamposSegunCategoria()">
+          <option value="CLASE_REGULAR">Clase Regular</option>
+          <option value="EXAMEN">Examen</option>
+          <option value="CONTRACURSADA">Contracursada</option>
+          <option value="EVENTO/CAPACITACIÓN">Evento/Capacitación</option>
+        </select>
+      </div>
+    </div>
+    <div id="campoCuatrimestre">
+      <label class="field-label">📚 Cuatrimestre</label>
+      <select id="cuatrimestre" onchange="filtrarMateriasPorCuatrimestre()">
+        <option value="1">1er Cuatrimestre</option>
+        <option value="2">2do Cuatrimestre</option>
+      </select>
+    </div>
+    <div id="campoCarrera">
+      <label class="field-label">🎓 Carrera</label>
+      <select id="carrera" onchange="filtrarMateriasPorCuatrimestre()">
+        <option value="TODAS">Todas las carreras</option>
+      </select>
+    </div>
+    <div id="campoMateria">
+      <label class="field-label">Materia</label>
+      <select id="materia"></select>
+    </div>
+    <div id="campoTituloEvento">
+      <label class="field-label">📝 Título del Evento</label>
+      <input type="text" id="tituloEvento" placeholder="Nombre del evento...">
+    </div>
+    <div class="form-grid-2">
+      <div><label class="field-label">Edificio</label><select id="edificio"></select></div>
+    </div>
+    <div id="cont-aulas" style="margin-bottom:14px;">
+      <label class="field-label">Aula(s)</label>
+      <div class="aula-row">
+        <input class="aula-in" placeholder="Ej: 101" style="flex:1;">
+        <button class="btn" onclick="addAula()">+ Agregar</button>
+      </div>
+    </div>
+    <p class="form-section-label">Horario(s)</p>
+    <div id="cont-horarios">
+      <div class="horario-row">
+        <input type="time" class="horario-inicio" style="flex:1;">
+        <span>-</span>
+        <input type="time" class="horario-fin" style="flex:1;">
+        <button class="btn" onclick="addHorario()">+ Horario</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-save" id="btn-principal" onclick="guardar()">Guardar</button>
+      <button class="btn btn-cancel" onclick="cerrarModalForm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⚠️ REEMPLAZÁ ESTA URL POR LA URL DE TU DESPLIEGUE EN APPS SCRIPT
+const URL_API_ADMIN = "https://script.google.com/macros/s/AKfycbzRscYVMA2NNuk-pGybvKwaiSdf-aOS6Sn2Ao7v1C-AEJc4RYylBI09qykQO15_R1cK_A/exec";
+
+let todasLasAulas = [];
+let listaMateriasCompleta = [];
+let cuatrimestreActivo = "1";
+
+let visibilidadUsuarios = {
+  CLASE_REGULAR: true,
+  EXAMEN: true,
+  CONTRACURSADA: true,
+  "EVENTO/CAPACITACIÓN": true
+};
+
+const MAPEO_CHECKBOX_ID = {
+  "CLASE_REGULAR": "vis-CLASE_REGULAR",
+  "EXAMEN": "vis-EXAMEN",
+  "CONTRACURSADA": "vis-CONTRACURSADA",
+  "EVENTO/CAPACITACIÓN": "vis-EVENTO"
+};
+
+window.onload = () => {
+  cargarCuatrimestreGuardado();
+  cargarVisibilidadDesdeSheets();
+  cargarListas();
+  actualizarDatos();
+};
+
+function cambiarCuatrimestre() {
+  const sw = document.getElementById('swCuatri');
+  const esCuatri1 = cuatrimestreActivo === "1";
+  
+  if (esCuatri1) {
+    sw.classList.add('cuatri2');
+    cuatrimestreActivo = "2";
+  } else {
+    sw.classList.remove('cuatri2');
+    cuatrimestreActivo = "1";
+  }
+  
+  document.getElementById('cuatri1-section').classList.toggle('oculto', cuatrimestreActivo !== "1");
+  document.getElementById('cuatri2-section').classList.toggle('oculto', cuatrimestreActivo !== "2");
+  
+  fetch(URL_API_ADMIN, {
+    method: "POST",
+    body: JSON.stringify({ action: "guardarCuatri", valor: cuatrimestreActivo })
+  });
+  
+  renderTablas();
+}
+
+function cargarCuatrimestreGuardado() {
+  fetch(`${URL_API_ADMIN}?action=obtenerCuatriActivo`)
+    .then(res => res.json())
+    .then(valor => {
+      if (valor === "2") {
+        cuatrimestreActivo = "2";
+        document.getElementById('swCuatri').classList.add('cuatri2');
+        document.getElementById('cuatri1-section').classList.add('oculto');
+        document.getElementById('cuatri2-section').classList.remove('oculto');
+      }
+    })
+    .catch(err => console.error("Error al cargar cuatrimestre:", err));
+}
+
+function cargarVisibilidadDesdeSheets() {
+  fetch(`${URL_API_ADMIN}?action=obtenerConfigCategorias`)
+    .then(res => res.json())
+    .then(configuraciones => {
+      if (!configuraciones || !configuraciones.length) return;
+      configuraciones.forEach(fila => {
+        const cat = fila[0];
+        const visible = String(fila[1]).toUpperCase() !== "FALSE";
+        visibilidadUsuarios[cat] = visible;
+        const checkId = MAPEO_CHECKBOX_ID[cat];
+        if (checkId && document.getElementById(checkId)) {
+          document.getElementById(checkId).checked = visible;
+        }
+      });
+    })
+    .catch(err => console.error("Error al cargar visibilidad:", err));
+}
+
+function guardarVisibilidadCategoria(categoria, visible) {
+  visibilidadUsuarios[categoria] = visible;
+  fetch(URL_API_ADMIN, {
+    method: "POST",
+    body: JSON.stringify({ action: "guardarVisibilidad", categoria, visible })
+  });
+}
+
+function agruparPorClave(registros) {
+  const grupos = {};
+  registros.forEach(item => {
+    const clave = `${item.dia}|${item.materia}|${item.edificio}|${item.cuatrimestre || ''}`;
+    if (!grupos[clave]) {
+      grupos[clave] = {
+        ids: [], dia: item.dia, materia: item.materia, edificio: item.edificio,
+        cuatrimestre: item.cuatrimestre, aulas: new Set(), horarios: []
+      };
+    }
+    grupos[clave].ids.push(item.id);
+    grupos[clave].aulas.add(item.aula);
+    if (item.horarioInicio && item.horarioFin) {
+      grupos[clave].horarios.push(`${item.horarioInicio} - ${item.horarioFin}`);
+    }
+  });
+  return Object.values(grupos);
+}
+
+function filaVacia(texto) {
+  return `<tr class="empty-row"><td colspan="6">${texto}</td></tr>`;
+}
+
+function crearFila(grupo) {
+  const aulasTexto = [...grupo.aulas].join(" - ");
+  const horariosTexto = grupo.horarios.join("<br>");
+  return `<tr>
+    <td>${grupo.dia}</td>
+    <td><b>${grupo.materia || ""}</b></td>
+    <td>${aulasTexto}</td>
+    <td style="font-family:var(--font-mono); font-size:12px;">${horariosTexto}</td>
+    <td>${grupo.edificio}</td>
+    <td>
+      <button class="btn btn-edit" onclick="prepararEdicion('${grupo.ids[0]}')">✏️</button>
+      <button class="btn btn-del" onclick="eliminarGrupo('${grupo.ids.join("','")}')">✕</button>
+    </td>
+  </tr>`;
+}
+
+function toggleCategoria(catId, boton) {
+  let contenedorId = catId.replace(/\//g, "\\/");
+  const contenedor = document.getElementById(`cont-${contenedorId}`) || document.getElementById(`cont-${catId}`);
+  if (!contenedor) return;
+  const estaVisible = contenedor.classList.contains('visible');
+  if (estaVisible) {
+    contenedor.classList.remove('visible');
+    boton.classList.remove('active');
+  } else {
+    contenedor.classList.add('visible');
+    boton.classList.add('active');
+    renderTablas();
+  }
+}
+
+function abrirModalFormPorCategoria(categoria) {
+  limpiarFormulario();
+  document.getElementById('modalFormTitulo').innerText = 'Nueva Asignación';
+  document.getElementById('categoria').value = categoria;
+  actualizarCamposSegunCategoria();
+  document.getElementById('modalForm').classList.add('open');
+}
+
+function actualizarCamposSegunCategoria() {
+  const categoria = document.getElementById('categoria').value;
+  const esEvento = categoria.includes("EVENTO");
+  const esClaseRegular = categoria === "CLASE_REGULAR";
+  document.getElementById('campoMateria').style.display = esEvento ? 'none' : 'block';
+  document.getElementById('campoTituloEvento').classList.toggle('visible', esEvento);
+  document.getElementById('campoCuatrimestre').classList.toggle('visible', esClaseRegular);
+  document.getElementById('campoCarrera').style.display = esEvento ? 'none' : 'block';
+  filtrarMateriasPorCuatrimestre();
+}
+
+function filtrarMateriasPorCuatrimestre() {
+  const categoria = document.getElementById('categoria').value;
+  const selectMateria = document.getElementById('materia');
+  const carreraSelec = document.getElementById('carrera') ? document.getElementById('carrera').value : "TODAS";
+  selectMateria.innerHTML = "";
+  
+  if (categoria === "EXAMEN" || categoria === "CONTRACURSADA") {
+    listaMateriasCompleta.forEach(mat => {
+      if (carreraSelec === "TODAS" || mat.carrera === carreraSelec) {
+        selectMateria.innerHTML += `<option>${mat.nombre}</option>`;
+      }
+    });
+    return;
+  }
+  
+  if (categoria === "CLASE_REGULAR") {
+    const cuatri = document.getElementById('cuatrimestre').value;
+    listaMateriasCompleta.forEach(mat => {
+      const coincideCuatri = mat.cuatrimestre === cuatri || (!mat.cuatrimestre && cuatri === "1");
+      const coincideCarrera = carreraSelec === "TODAS" || mat.carrera === carreraSelec;
+      if (coincideCuatri && coincideCarrera) {
+        selectMateria.innerHTML += `<option>${mat.nombre}</option>`;
+      }
+    });
+  }
+}
+
+function limpiarFormulario() {
+  document.getElementById('idEditar').value = "";
+  document.getElementById('categoria').value = "CLASE_REGULAR";
+  document.getElementById('tituloEvento').value = "";
+  document.getElementById('cuatrimestre').value = cuatrimestreActivo;
+  if(document.getElementById('carrera')) document.getElementById('carrera').value = "TODAS";
+  document.getElementById('cont-aulas').innerHTML = `<label class="field-label">Aula(s)</label><div class="aula-row"><input class="aula-in" placeholder="Ej: 101" style="flex:1;"><button class="btn" onclick="addAula()">+ Agregar</button></div>`;
+  document.getElementById('cont-horarios').innerHTML = `<div class="horario-row"><input type="time" class="horario-inicio" style="flex:1;"><span>-</span><input type="time" class="horario-fin" style="flex:1;"><button class="btn" onclick="addHorario()">+ Horario</button></div>`;
+}
+
+function cerrarModalForm() {
+  document.getElementById('modalForm').classList.remove('open');
+  limpiarFormulario();
+}
+
+function addAula() {
+  const div = document.createElement('div');
+  div.className = 'aula-row';
+  div.innerHTML = `<input class="aula-in" placeholder="Aula..." style="flex:1;"><button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('cont-aulas').appendChild(div);
+}
+
+function addHorario() {
+  const div = document.createElement('div');
+  div.className = 'horario-row';
+  div.innerHTML = `<input type="time" class="horario-inicio" style="flex:1;"><span>-</span><input type="time" class="horario-fin" style="flex:1;"><button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('cont-horarios').appendChild(div);
+}
+
+function cargarListas() {
+  fetch(`${URL_API_ADMIN}?action=obtenerMaterias`)
+    .then(res => res.json())
+    .then(materias => {
+      listaMateriasCompleta = materias || [];
+      const carreras = [...new Set(listaMateriasCompleta.map(m => m.carrera).filter(Boolean))];
+      
+      document.querySelectorAll('.select-carreras-filter').forEach(sel => {
+        sel.innerHTML = '<option value="TODOS">Todas las carreras</option>';
+        carreras.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+      });
+
+      const selectCarreraModal = document.getElementById('carrera');
+      if (selectCarreraModal) {
+        selectCarreraModal.innerHTML = '<option value="TODAS">Todas las carreras</option>';
+        carreras.forEach(c => selectCarreraModal.innerHTML += `<option value="${c}">${c}</option>`);
+      }
+
+      filtrarMateriasPorCuatrimestre();
+    });
+
+  fetch(`${URL_API_ADMIN}?action=obtenerEdificios`)
+    .then(res => res.json())
+    .then(edificios => {
+      if (edificios && edificios.length > 0) {
+        const s = document.getElementById('edificio');
+        s.innerHTML = "";
+        edificios.forEach(e => s.innerHTML += `<option>${e}</option>`);
+        document.querySelectorAll('.select-edificios-filter').forEach(sel => {
+          sel.innerHTML = '<option value="TODOS">Todos los edificios</option>';
+          edificios.forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
+        });
+      }
+    });
+}
+
+function actualizarDatos() {
+  fetch(`${URL_API_ADMIN}?action=obtenerAulas`)
+    .then(res => res.json())
+    .then(res => {
+      todasLasAulas = res || [];
+      renderTablas();
+    });
+}
+
+function renderTablas() {
+  if (!todasLasAulas.length) return;
+
+  // 1. CLASES REGULARES
+  const filtroDiaCR = document.getElementById('filter-dia-CLASE_REGULAR')?.value || "TODOS";
+  const filtroEdCR = document.getElementById('filter-edificio-CLASE_REGULAR')?.value || "TODOS";
+  const filtroCarCR = document.getElementById('filter-carrera-CLASE_REGULAR')?.value || "TODOS";
+
+  const crFiltradas = todasLasAulas.filter(item => {
+    const catOk = item.categoria === "CLASE_REGULAR";
+    const estadoOk = item.estado === "OCUPADA";
+    const visOk = item.visible !== false;
+    const diaOk = filtroDiaCR === "TODOS" || item.dia === filtroDiaCR;
+    const edOk = filtroEdCR === "TODOS" || item.edificio === filtroEdCR;
+    
+    let carOk = true;
+    if (filtroCarCR !== "TODOS") {
+      const matObj = listaMateriasCompleta.find(m => m.nombre === item.materia);
+      carOk = matObj ? matObj.carrera === filtroCarCR : false;
+    }
+    
+    return catOk && estadoOk && visOk && diaOk && edOk && carOk;
+  });
+
+  const cr1 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "1"));
+  const cr2 = agruparPorClave(crFiltradas.filter(i => i.cuatrimestre === "2"));
+
+  document.getElementById('tablaCuatri1').innerHTML = cr1.length ? cr1.map(crearFila).join("") : filaVacia("Sin asignaciones 1er Cuatrimestre");
+  document.getElementById('tablaCuatri2').innerHTML = cr2.length ? cr2.map(crearFila).join("") : filaVacia("Sin asignaciones 2do Cuatrimestre");
+
+  // 2. EXÁMENES
+  const filtroDiaEX = document.getElementById('filter-dia-EXAMEN')?.value || "TODOS";
+  const filtroEdEX = document.getElementById('filter-edificio-EXAMEN')?.value || "TODOS";
+  const filtroCarEX = document.getElementById('filter-carrera-EXAMEN')?.value || "TODOS";
+
+  const examenesFiltrados = todasLasAulas.filter(item => {
+    const catOk = item.categoria === "EXAMEN";
+    const estadoOk = item.estado === "OCUPADA";
+    const visOk = item.visible !== false;
+    const diaOk = filtroDiaEX === "TODOS" || item.dia === filtroDiaEX;
+    const edOk = filtroEdEX === "TODOS" || item.edificio === filtroEdEX;
+
+    let carOk = true;
+    if (filtroCarEX !== "TODOS") {
+      const matObj = listaMateriasCompleta.find(m => m.nombre === item.materia);
+      carOk = matObj ? matObj.carrera === filtroCarEX : false;
+    }
+
+    return catOk && estadoOk && visOk && diaOk && edOk && carOk;
+  });
+  const examenes = agruparPorClave(examenesFiltrados);
+  document.getElementById('tablaExamenes').innerHTML = examenes.length ? examenes.map(crearFila).join("") : filaVacia("Sin exámenes");
+
+  // 3. CONTRACURSADAS
+  const filtroDiaCC = document.getElementById('filter-dia-CONTRACURSADA')?.value || "TODOS";
+  const filtroEdCC = document.getElementById('filter-edificio-CONTRACURSADA')?.value || "TODOS";
+  const filtroCarCC = document.getElementById('filter-carrera-CONTRACURSADA')?.value || "TODOS";
+
+  const ccFiltradas = todasLasAulas.filter(item => {
+    const catOk = item.categoria === "CONTRACURSADA";
+    const estadoOk = item.estado === "OCUPADA";
+    const visOk = item.visible !== false;
+    const diaOk = filtroDiaCC === "TODOS" || item.dia === filtroDiaCC;
+    const edOk = filtroEdCC === "TODOS" || item.edificio === filtroEdCC;
+
+    let carOk = true;
+    if (filtroCarCC !== "TODOS") {
+      const matObj = listaMateriasCompleta.find(m => m.nombre === item.materia);
+      carOk = matObj ? matObj.carrera === filtroCarCC : false;
+    }
+
+    return catOk && estadoOk && visOk && diaOk && edOk && carOk;
+  });
+  const contracursadas = agruparPorClave(ccFiltradas);
+  document.getElementById('tablaContracursadas').innerHTML = contracursadas.length ? contracursadas.map(crearFila).join("") : filaVacia("Sin contracursadas");
+
+  // 4. EVENTOS
+  const eventos = agruparPorClave(todasLasAulas.filter(item =>
+    item.categoria === "EVENTO/CAPACITACIÓN" && item.estado === "OCUPADA" && item.visible !== false
+  ));
+  document.getElementById('tablaEventos').innerHTML = eventos.length ? eventos.map(crearFila).join("") : filaVacia("Sin eventos");
+}
+
+function prepararEdicion(id) {
+  id = String(id).trim();
+  const base = todasLasAulas.find(x => String(x.id).trim() === id);
+  if (!base) return alert("No encontrado");
+
+  document.getElementById('idEditar').value = base.id;
+  document.getElementById('dia').value = base.dia;
+  document.getElementById('categoria').value = base.categoria;
+  document.getElementById('edificio').value = base.edificio;
+
+  if (base.categoria === "CLASE_REGULAR") {
+    document.getElementById('cuatrimestre').value = base.cuatrimestre || "1";
+  }
+
+  if (base.categoria === "EVENTO/CAPACITACIÓN") {
+    document.getElementById('tituloEvento').value = base.materia;
+  } else {
+    setTimeout(() => {
+      document.getElementById('materia').value = base.materia;
+    }, 50);
+  }
+
+  const contenedorAulas = document.getElementById('cont-aulas');
+  contenedorAulas.innerHTML = `<label class="field-label">Aula(s)</label>`;
+
+  let textoAulas = base.aula || "";
+  let listaAulas = [];
+  if (textoAulas.indexOf(" - ") !== -1) {
+    listaAulas = textoAulas.split(" - ");
+  } else if (textoAulas.trim() !== "") {
+    listaAulas = [textoAulas];
+  } else {
+    listaAulas = [""];
+  }
+
+  listaAulas.forEach(function(aula) {
+    aula = aula.trim();
+    const fila = document.createElement('div');
+    fila.className = 'aula-row';
+    fila.innerHTML = '<input class="aula-in" value="' + aula.replace(/"/g, '&quot;') + '" placeholder="Ej: 101" style="flex:1;">' +
+      '<button class="btn" onclick="this.parentElement.remove()">✕</button>';
+    contenedorAulas.appendChild(fila);
+  });
+
+  const filaBtn = document.createElement('div');
+  filaBtn.className = 'aula-row';
+  filaBtn.innerHTML = '<button class="btn" onclick="addAula()">+ Agregar Aula</button>';
+  contenedorAulas.appendChild(filaBtn);
+
+  const contenedorHorarios = document.getElementById('cont-horarios');
+  contenedorHorarios.innerHTML = "";
+
+  let textoInicio = base.horarioInicio || "";
+  let textoFin = base.horarioFin || "";
+  let listaInicio = [], listaFin = [];
+
+  if (textoInicio.indexOf(" | ") !== -1) {
+    listaInicio = textoInicio.split(" | ");
+    listaFin = textoFin.split(" | ");
+  } else if (textoInicio.trim() !== "") {
+    listaInicio = [textoInicio];
+    listaFin = [textoFin];
+  } else {
+    listaInicio = [""];
+    listaFin = [""];
+  }
+
+  const maxFilas = Math.max(listaInicio.length, listaFin.length);
+  for (let i = 0; i < maxFilas; i++) {
+    const hi = (listaInicio[i] || "").trim();
+    const hf = (listaFin[i] || "").trim();
+    const filaH = document.createElement('div');
+    filaH.className = 'horario-row';
+    filaH.innerHTML = '<input type="time" class="horario-inicio" value="' + hi + '" style="flex:1;">' +
+      '<span>-</span>' +
+      '<input type="time" class="horario-fin" value="' + hf + '" style="flex:1;">' +
+      '<button class="btn" onclick="this.parentElement.remove()">✕</button>';
+    contenedorHorarios.appendChild(filaH);
+  }
+
+  const filaBtnH = document.createElement('div');
+  filaBtnH.className = 'horario-row';
+  filaBtnH.innerHTML = '<button class="btn" onclick="addHorario()">+ Agregar Horario</button>';
+  contenedorHorarios.appendChild(filaBtnH);
+
+  actualizarCamposSegunCategoria();
+  document.getElementById('modalForm').classList.add('open');
+}
+
+function guardar() {
+  const id = document.getElementById('idEditar').value || "";
+  const dia = document.getElementById('dia').value;
+  const categoria = document.getElementById('categoria').value;
+  const edificio = document.getElementById('edificio').value;
+  
+  let cuatrimestre = "1";
+  const campoCuatri = document.getElementById('cuatrimestre');
+  if (campoCuatri) cuatrimestre = campoCuatri.value || "1";
+  
+  let materia = "";
+  if (categoria === "EVENTO/CAPACITACIÓN") {
+    const campoEvento = document.getElementById('tituloEvento');
+    if (!campoEvento) return alert("Campo de título de evento no encontrado");
+    materia = campoEvento.value.trim();
+    if (!materia) return alert("Escribí el título del evento");
+  } else {
+    const campoMateria = document.getElementById('materia');
+    if (!campoMateria) return alert("Campo de materia no encontrado");
+    materia = campoMateria.value;
+  }
+  
+  const aulas = Array.from(document.querySelectorAll('.aula-in'))
+    .map(i => i.value.trim())
+    .filter(Boolean);
+  
+  if (!aulas.length) return alert("Agregá al menos un aula");
+  
+  const horarios = Array.from(document.querySelectorAll('.horario-row'))
+    .map(row => {
+      const inicio = row.querySelector('.horario-inicio')?.value || "";
+      const fin = row.querySelector('.horario-fin')?.value || "";
+      return { inicio, fin };
+    })
+    .filter(h => h.inicio && h.fin);
+  
+  if (!horarios.length) return alert("Agregá al menos un horario");
+
+  fetch(URL_API_ADMIN, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "guardarMateria",
+      id, dia, materia, edificio, aulas, horarios, categoria, colores: [], esOcupada: false, cuatrimestre
+    })
+  })
+  .then(res => res.json())
+  .then(() => {
+    actualizarDatos();
+    cerrarModalForm();
+    alert(id ? "✅ Asignación modificada correctamente" : "✅ Asignación agregada correctamente");
+  })
+  .catch(err => console.error("Error al guardar:", err));
+}
+
+function eliminarGrupo(ids) {
+  if (!confirm("¿Eliminar?")) return;
+  const listaIds = String(ids).split(",");
+  
+  fetch(URL_API_ADMIN, {
+    method: "POST",
+    body: JSON.stringify({ action: "eliminarMateria", ids: listaIds })
+  })
+  .then(res => res.json())
+  .then(() => actualizarDatos())
+  .catch(err => console.error("Error al eliminar:", err));
+}
+</script>
+</body>
+</html>
