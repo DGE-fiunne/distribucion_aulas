@@ -701,6 +701,103 @@ function renderTablas() {
   document.getElementById('tablaEventos').innerHTML = ev.length ? ev.map(crearFila).join("") : filaVacia("Sin eventos");
 }
 
+ function prepararEdicion(id) {
+  id = String(id).trim();
+  const base = todasLasAulas.find(x => String(x.id).trim() === id);
+  if (!base) return alert("Registro no encontrado");
+
+  document.getElementById('idEditar').value = base.id;
+  document.getElementById('dia').value = base.dia;
+  
+  let catForm = base.categoria;
+  if (catForm.startsWith("EVENTO")) catForm = "EVENTO";
+  document.getElementById('categoria').value = catForm;
+  
+  if (base.edificio) document.getElementById('edificio').value = base.edificio;
+
+  if (base.categoria === "CLASE_REGULAR") {
+    document.getElementById('cuatrimestre').value = base.cuatrimestre || "1";
+  }
+
+  if (base.categoria.startsWith("EVENTO")) {
+    document.getElementById('tituloEvento').value = base.materia;
+  } else {
+    setTimeout(() => {
+      document.getElementById('materia').value = base.materia;
+    }, 50);
+  }
+
+  // Poblar Aulas
+  const contenedorAulas = document.getElementById('cont-aulas');
+  contenedorAulas.innerHTML = `<label class="field-label">Aula(s)</label>`;
+
+  let textoAulas = base.aula || "";
+  let listaAulas = [];
+  if (textoAulas.indexOf(" - ") !== -1) {
+    listaAulas = textoAulas.split(" - ");
+  } else if (textoAulas.trim() !== "") {
+    listaAulas = [textoAulas];
+  } else {
+    listaAulas = [""];
+  }
+
+  listaAulas.forEach(function(aula) {
+    aula = aula.trim();
+    const fila = document.createElement('div');
+    fila.className = 'aula-row';
+    fila.innerHTML = `<input class="aula-in" value="${aula.replace(/"/g, '&quot;')}" placeholder="Ej: 101" style="flex:1;">` +
+      `<button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+    contenedorAulas.appendChild(fila);
+  });
+
+  const filaBtn = document.createElement('div');
+  filaBtn.className = 'aula-row';
+  filaBtn.innerHTML = `<button class="btn" onclick="addAula()">+ Agregar Aula</button>`;
+  contenedorAulas.appendChild(filaBtn);
+
+  // Poblar Horarios
+  const contenedorHorarios = document.getElementById('cont-horarios');
+  contenedorHorarios.innerHTML = "";
+
+  let textoInicio = base.horarioInicio || "";
+  let textoFin = base.horarioFin || "";
+  let listaInicio = [], listaFin = [];
+
+  if (textoInicio.indexOf(" | ") !== -1) {
+    listaInicio = textoInicio.split(" | ");
+    listaFin = textoFin.split(" | ");
+  } else if (textoInicio.trim() !== "") {
+    listaInicio = [textoInicio];
+    listaFin = [textoFin];
+  } else {
+    listaInicio = [""];
+    listaFin = [""];
+  }
+
+  const maxFilas = Math.max(listaInicio.length, listaFin.length);
+  for (let i = 0; i < maxFilas; i++) {
+    const hi = (listaInicio[i] || "").trim();
+    const hf = (listaFin[i] || "").trim();
+    const filaH = document.createElement('div');
+    filaH.className = 'horario-row';
+    filaH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;">` +
+      `<span>-</span>` +
+      `<input type="time" class="horario-fin" value="${hf}" style="flex:1;">` +
+      `<button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
+    contenedorHorarios.appendChild(filaH);
+  }
+
+  const filaBtnH = document.createElement('div');
+  filaBtnH.className = 'horario-row';
+  filaBtnH.innerHTML = `<button class="btn" onclick="addHorario()">+ Agregar Horario</button>`;
+  contenedorHorarios.appendChild(filaBtnH);
+
+  actualizarCamposSegunCategoria();
+  document.getElementById('modalFormTitulo').innerText = 'Editar Asignación';
+  document.getElementById('modalForm').classList.add('open');
+}
+
+ 
 function guardar() {
   const id = document.getElementById('idEditar').value || "";
   const dia = document.getElementById('dia').value;
