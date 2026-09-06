@@ -717,7 +717,7 @@
 
       const elemHeader = document.getElementById("txt-header");
       if (elemHeader) {
-        const textoCuatri = res.cuatrimestreActivo ? ` (${res.cuatrimestreActivo}° Cuatri)` : "";
+        const textoCuatri = res.cuatrimestreActivo ? ` (${res.cuatrimestreActivo}° Cuatrimestre)` : "";
         const textoEdificio = eSel === "TODOS" ? "" : ` - ${eSel}`;
         elemHeader.innerText = `Distribución de Aulas${textoCuatri}${textoEdificio}`;
       }
