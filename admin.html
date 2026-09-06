@@ -810,19 +810,47 @@ function guardar() {
   let materia = (categoria.startsWith("EVENTO")) ? document.getElementById('tituloEvento').value.trim() : document.getElementById('materia').value;
   if (!materia) return alert("Escribí o seleccioná una materia/evento");
 
-  const aulas = Array.from(document.querySelectorAll('.aula-in')).map(i => i.value.trim()).filter(Boolean);
-  const horarios = Array.from(document.querySelectorAll('.horario-row')).map(row => ({
-    inicio: row.querySelector('.horario-inicio')?.value || "",
-    fin: row.querySelector('.horario-fin')?.value || ""
-  })).filter(h => h.inicio && h.fin);
+  // Capturar todas las aulas agregadas
+  const aulas = Array.from(document.querySelectorAll('.aula-in'))
+    .map(i => i.value.trim())
+    .filter(Boolean);
 
-  if (!aulas.length || !horarios.length) return alert("Completá aulas y horarios");
+  // Capturar TODOS los bloques de horarios
+  const listaHorariosInicio = [];
+  const listaHorariosFin = [];
+
+  document.querySelectorAll('.horario-row').forEach(row => {
+    const inicio = row.querySelector('.horario-inicio')?.value || "";
+    const fin = row.querySelector('.horario-fin')?.value || "";
+    if (inicio && fin) {
+      listaHorariosInicio.push(inicio);
+      listaHorariosFin.push(fin);
+    }
+  });
+
+  if (!aulas.length) return alert("Agregá al menos un aula");
+  if (!listaHorariosInicio.length) return alert("Agregá al menos un horario");
+
+  // Unir múltiples horarios en strings separados por " | "
+  const horarioInicioStr = listaHorariosInicio.join(" | ");
+  const horarioFinStr = listaHorariosFin.join(" | ");
 
   fetch(URL_API_ADMIN, {
     method: "POST",
     body: JSON.stringify({
       action: "guardarMateria",
-      id, dia, materia, edificio, aulas, horarios, categoria, colores: [], esOcupada: false, cuatrimestre
+      id, 
+      dia, 
+      materia, 
+      edificio, 
+      aulas, 
+      horarios: [{ inicio: horarioInicioStr, fin: horarioFinStr }], 
+      horarioInicio: horarioInicioStr,
+      horarioFin: horarioFinStr,
+      categoria, 
+      colores: [], 
+      esOcupada: false, 
+      cuatrimestre
     })
   })
   .then(res => res.json())
@@ -830,7 +858,8 @@ function guardar() {
     actualizarDatos();
     cerrarModalForm();
     alert("✅ Guardado correctamente");
-  });
+  })
+  .catch(err => alert("Error al guardar: " + err));
 }
 
 function eliminarGrupo(ids) {
