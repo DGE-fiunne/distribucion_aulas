@@ -779,30 +779,21 @@ function guardar() {
 
   const aulas = Array.from(document.querySelectorAll('.aula-in')).map(i => i.value.trim()).filter(Boolean);
 
-  const listaHorariosInicio = [];
-  const listaHorariosFin = [];
-
+  const listaHorarios = [];
   document.querySelectorAll('.horario-row').forEach(row => {
     const inicio = row.querySelector('.horario-inicio')?.value || "";
     const fin = row.querySelector('.horario-fin')?.value || "";
     if (inicio && fin) {
-      listaHorariosInicio.push(inicio);
-      listaHorariosFin.push(fin);
+      listaHorarios.push({ inicio, fin });
     }
   });
 
-  if (!aulas.length) return alert("Agregá al menos un aula");
-  if (!listaHorariosInicio.length) return alert("Agregá al menos un horario");
-
-  const horarioInicioStr = listaHorariosInicio.join(" | ");
-  const horarioFinStr = listaHorariosFin.join(" | ");
+  if (!aulas.length || !listaHorarios.length) return alert("Completá aulas y horarios");
 
   const payload = {
     action: "guardarMateria",
     id, dia, materia, edificio, aulas,
-    horarios: [{ inicio: horarioInicioStr, fin: horarioFinStr }],
-    horarioInicio: horarioInicioStr,
-    horarioFin: horarioFinStr,
+    horarios: listaHorarios,
     categoria, colores: [], esOcupada: false, cuatrimestre
   };
 
