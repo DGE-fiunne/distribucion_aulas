@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 
   <style>
-
     * { box-sizing: border-box; }
     :root {
       --bg-main: #0f172a;
@@ -31,8 +30,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    /* 🔝 HEADER ADAPTABLE */
 
     .header {
       display: flex;
@@ -79,7 +76,7 @@
       border-radius: 20px;
       border: 1px solid rgba(34, 197, 94, 0.2);
     }
-    /* 🎛️ PANEL DE FILTROS FLUIDO */
+
     .container {
       width: 100%;
       max-width: 100%;
@@ -133,7 +130,6 @@
       box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
     }
 
-    /* 📊 TABLA RESPONSIVA */
     .table-responsive {
       width: 100%;
       overflow-x: auto;
@@ -164,7 +160,6 @@
 
     tr:hover {
       background: rgba(255, 255, 255, 0.02);
-
     }
 
     .materia-info {
@@ -183,7 +178,6 @@
       color: var(--text-muted);
     }
 
-    /* 🏷️ BADGES Y AULAS */
     .badge-tipo {
       display: inline-block;
       padding: 4px 10px;
@@ -196,7 +190,7 @@
     }
 
     .badge-clase { background: rgba(245, 145, 39, 0.15); color: #2A9D8F; border: 1px solid rgba(245, 145, 39, 0.3); }
-    .badge-examen { background: rgba(42, 157, 143, 0.15); color: #F9F7F3; border: 1px solid rgba(42, 157, 143, 0.15) }
+    .badge-examen { background: rgba(42, 157, 143, 0.15); color: #F9F7F3; border: 1px solid rgba(42, 157, 143, 0.15); }
     .badge-contracursada { background: rgba(47, 195, 210, 0.15); color: #2A9D8F; border: 1px solid rgba(47, 195, 210, 0.3); }
     .badge-evento { background: rgba(46, 212, 122, 0.15); color: #2A9D8F; border: 1px solid rgba(46, 212, 122, 0.3); }
 
@@ -241,34 +235,19 @@
 
     .updating #loader { visibility: visible; }
 
-    /* 📱 VISTA MÓVIL (PANTALLAS < 768px) */
     @media (max-width: 768px) {
-      .header {
-        padding: 10px 16px;
-      }
-      .brand-container img {
-        height: 32px;
-      }
-      .titulo {
-        font-size: 13px;
-      }
-      .reloj {
-        font-size: 14px;
-        padding: 4px 10px;
-      }
-      .container {
-        padding: 10px;
-      }
+      .header { padding: 10px 16px; }
+      .brand-container img { height: 32px; }
+      .titulo { font-size: 13px; }
+      .reloj { font-size: 14px; padding: 4px 10px; }
+      .container { padding: 10px; }
       .panel-seccion {
         grid-template-columns: 1fr 1fr;
         padding: 12px;
         gap: 10px;
       }
-      .seccion-contenedor {
-        border-radius: 10px;
-      }
+      .seccion-contenedor { border-radius: 10px; }
       
-      /* TRANSFORMACIÓN DE TABLA A TARJETAS */
       table, thead, tbody { display: block; width: 100%; }
       thead { display: none; }
       tr {
@@ -284,16 +263,9 @@
         border-bottom: 1px solid var(--border-color);
         padding: 14px;
       }
-      tr:last-child {
-        border-bottom: none;
-      }
-      tr:has(td.sin-resultados) {
-        display: block;
-      }
-      td {
-        padding: 0;
-        border-bottom: none;
-      }
+      tr:last-child { border-bottom: none; }
+      tr:has(td.sin-resultados) { display: block; }
+      td { padding: 0; border-bottom: none; }
 
       td:nth-child(1) { grid-area: materia; align-self: center; }
       td:nth-child(1) .materia-nombre { font-size: 14px; }
@@ -305,14 +277,10 @@
       td:nth-child(5) { grid-area: horario; align-self: center; }
     }
 
-    /* 📱 MÓVILES PEQUEÑOS (< 480px) */
     @media (max-width: 480px) {
-     .panel-seccion {
-        grid-template-columns: 1fr;
-      }
+     .panel-seccion { grid-template-columns: 1fr; }
     }
 
-    /* ⚙️ BOTÓN DE CONFIGURACIÓN */
     .btn-config {
       background: var(--bg-input);
       border: 1px solid var(--border-color);
@@ -331,7 +299,6 @@
       border-color: var(--accent-green);
       transform: rotate(30deg);
     }
-    /* 🔒 MODAL DE ACCESO / CONTRASEÑA */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -344,9 +311,7 @@
       padding: 16px;
     }
 
-    .modal-overlay.open {
-      display: flex;
-    }
+    .modal-overlay.open { display: flex; }
     .modal-box {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -358,806 +323,386 @@
       text-align: center;
     }
     .modal-box h3 {
-
       margin: 0 0 8px 0;
-
       font-size: 18px;
-
       color: var(--text-main);
-
     }
-
-
 
     .modal-box p {
-
       margin: 0 0 16px 0;
-
       font-size: 13px;
-
       color: var(--text-muted);
-
     }
-
-
 
     .modal-box input[type="password"] {
-
       width: 100%;
-
       padding: 10px 14px;
-
       border-radius: 8px;
-
       border: 1px solid var(--border-color);
-
       background: var(--bg-input);
-
       color: var(--text-main);
-
       font-size: 14px;
-
       outline: none;
-
       margin-bottom: 16px;
-
       text-align: center;
-
     }
-
-
 
     .modal-box input[type="password"]:focus {
-
       border-color: var(--accent-green);
-
     }
-
-
 
     .modal-buttons {
-
       display: flex;
-
       gap: 10px;
-
     }
-
-
 
     .btn-modal {
-
       flex: 1;
-
       padding: 10px;
-
       border-radius: 8px;
-
       font-weight: 600;
-
       font-size: 13px;
-
       border: none;
-
       cursor: pointer;
-
       transition: 0.2s;
-
     }
-
-
 
     .btn-modal-confirm {
-
       background: var(--accent-green);
-
       color: #000;
-
     }
 
-
-
-    .btn-modal-confirm:hover {
-
-      opacity: 0.9;
-
-    }
-
-
+    .btn-modal-confirm:hover { opacity: 0.9; }
 
     .btn-modal-cancel {
-
       background: transparent;
-
       color: var(--text-muted);
-
       border: 1px solid var(--border-color);
-
     }
 
-
-
-    .btn-modal-cancel:hover {
-
-      background: rgba(255, 255, 255, 0.05);
-
-    }
-
-
+    .btn-modal-cancel:hover { background: rgba(255, 255, 255, 0.05); }
 
     #msgErrorAdmin {
-
       color: #ef4444;
-
       font-size: 12px;
-
       margin-bottom: 12px;
-
       display: none;
-
     }
-
   </style>
-
 </head>
-
 <body>
 
-
-
   <div class="header">
-
     <div class="brand-container">
-
       <img src="https://iili.io/ndEnhRj.md.png" alt="Logo">
-
       <div class="titulo" id="txt-header">Distribución de Aulas</div>
-
     </div>
-
-    <div id="loader">● Cargando...</div>
-
+    <div id="loader">&#10004</div>
     
-
     <div style="display: flex; align-items: center; gap: 12px;">
-
       <button class="btn-config" onclick="abrirModalAdmin()" title="Acceso Administrador">
-
         ⚙️
-
       </button>
-
       <div class="reloj" id="reloj">--:--</div>
-
     </div>
-
   </div>
-
-
 
   <div class="container">
-
     <div id="cont-aulas" class="seccion-contenedor" style="display:none;">
-
       
-
       <div class="panel-seccion">
-
         <div class="filter-group">
-
           <label>Categoría</label>
-
           <select id="fTipo" onchange="renderizarUI(datosCache)">
-
             <option value="TODOS">Todas las categorías</option>
-
           </select>
-
         </div>
 
-
-
+        <!-- FILTRO DE DÍAS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
-
           <label>Día</label>
-
           <select id="fDia" onchange="renderizarUI(datosCache)">
-
             <option value="TODOS">Todos los días</option>
-
-            <option>Lunes</option><option>Martes</option><option>Miércoles</option>
-
-            <option>Jueves</option><option>Viernes</option><option>Sábado</option>
-
+            <option value="Lunes">Lunes</option>
+            <option value="Martes">Martes</option>
+            <option value="Miércoles">Miércoles</option>
+            <option value="Jueves">Jueves</option>
+            <option value="Viernes">Viernes</option>
+            <option value="Sábado">Sábado</option>
           </select>
-
         </div>
 
-
-
+        <!-- FILTRO DE EDIFICIOS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
-
           <label>Edificio</label>
-
           <select id="fEdif" onchange="renderizarUI(datosCache)">
-
             <option value="TODOS">Todos los edificios</option>
-
+            <!-- Puedes reemplazar o agregar los nombres de tus edificios aquí -->
+            <option value="Edificio Central">Central - Av. Las Heras</option>
+            <option value="Edificio Electro">Electromecánica - Av. Castelli</option>
+          
           </select>
-
         </div>
 
-
-
+        <!-- FILTRO DE TURNOS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
-
           <label>Turno</label>
-
           <select id="fTurno" onchange="renderizarUI(datosCache)">
-
             <option value="TODOS">Todos los turnos</option>
-
-            <option value="MAÑANA">Mañana (07:30 - 13:30)</option>
-
-            <option value="TARDE">Tarde / Noche (14:00 - 22:00)</option>
-
+            <option value="MAÑANA">Mañana</option>
+            <option value="TARDE">Tarde / Noche </option>
           </select>
-
         </div>
-
       </div>
-
-
 
       <div class="table-responsive">
-
         <table>
-
           <thead>
-
             <tr>
-
               <th>Materia / Evento</th>
-
               <th>Categoría</th>
-
               <th>Edificio</th>
-
               <th>Aula(s)</th>
-
               <th>Horario</th>
-
             </tr>
-
           </thead>
-
           <tbody id="tabAulas"></tbody>
-
         </table>
-
       </div>
 
-
-
     </div>
-
   </div>
-
-
 
   <!-- MODAL DE CONTRASEÑA -->
-
   <div id="modalAdmin" class="modal-overlay">
-
     <div class="modal-box">
-
       <h3>⚙️ Acceso Administrador</h3>
-
       <p>Ingresá la contraseña para acceder al panel de gestión.</p>
-
       
-
       <input type="password" id="passAdminInput" placeholder="Contraseña..." onkeydown="if(event.key==='Enter') validarYRedirigirAdmin()">
-
       <div id="msgErrorAdmin">Contraseña incorrecta</div>
-
       
-
       <div class="modal-buttons">
-
         <button class="btn-modal btn-modal-cancel" onclick="cerrarModalAdmin()">Cancelar</button>
-
         <button class="btn-modal btn-modal-confirm" onclick="validarYRedirigirAdmin()">Ingresar</button>
-
       </div>
-
     </div>
-
   </div>
 
-
-
   <script>
-
-    // ⚠️ REEMPLAZÁ ESTA URL POR LA URL DE TU DESPLIEGUE EN GOOGLE APPS SCRIPT
-
     const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbyw2mlkmGTFsncIDWvVsggsQZiNJKRi7hKQcMFBTQO0oyZGAc_NQIwlKSWXDHkboZer/exec";
-
-
 
     let datosCache = null;
 
-
-
     function actualizarReloj() {
-
       const ahora = new Date();
-
       const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
       let h = ahora.getHours().toString().padStart(2, "0");
-
       let m = ahora.getMinutes().toString().padStart(2, "0");
-
       let s = ahora.getSeconds().toString().padStart(2, "0");
-
       document.getElementById("reloj").innerHTML = `${dias[ahora.getDay()]} ${h}:${m}:${s}`;
-
     }
-
-
 
     function cumpleTurno(horarioStr, turnoFiltro) {
-
       if (turnoFiltro === "TODOS" || !horarioStr) return true;
-
       const match = horarioStr.match(/(\d{1,2}):(\d{2})/);
-
       if (!match) return false;
-
       const h = parseInt(match[1]);
-
       const min = parseInt(match[2]);
-
       const totalMinutos = h * 60 + min;
 
-
-
       if (turnoFiltro === "MAÑANA") return (totalMinutos >= 450 && totalMinutos <= 810);
-
       if (turnoFiltro === "TARDE") return (totalMinutos > 810 && totalMinutos <= 1380);
-
       return true;
-
     }
-
-
 
     function minutosAHHMM(min) {
-
       const h = Math.floor(min / 60).toString().padStart(2, "0");
-
       const m = (min % 60).toString().padStart(2, "0");
-
       return `${h}:${m}`;
-
     }
-
-
 
     function extraerRangoHorario(horarioStr) {
-
       if (!horarioStr) return null;
-
       const matches = [...horarioStr.matchAll(/(\d{1,2}):(\d{2})/g)];
-
       if (matches.length === 0) return null;
-
       const minutos = matches.map(m => parseInt(m[1]) * 60 + parseInt(m[2]));
-
       return { inicio: Math.min(...minutos), fin: Math.max(...minutos) };
-
     }
-
-
 
     function agruparMaterias(lista) {
-
       const agrupado = {};
-
       lista.forEach(item => {
-
         const clave = `${item.materia}-${item.dia}-${item.edificio}-${item.tipo}`;
-
         const rango = extraerRangoHorario(item.horario);
 
-
-
         if (!agrupado[clave]) {
-
           agrupado[clave] = {
-
             ...item,
-
             aulas: item.aula ? [item.aula] : [],
-
             horaInicio: rango ? rango.inicio : null,
-
             horaFin: rango ? rango.fin : null
-
           };
-
         } else {
-
           if (item.aula && !agrupado[clave].aulas.includes(item.aula)) {
-
             agrupado[clave].aulas.push(item.aula);
-
           }
-
           if (rango) {
-
             if (agrupado[clave].horaInicio === null || rango.inicio < agrupado[clave].horaInicio) {
-
               agrupado[clave].horaInicio = rango.inicio;
-
             }
-
             if (agrupado[clave].horaFin === null || rango.fin > agrupado[clave].horaFin) {
-
               agrupado[clave].horaFin = rango.fin;
-
             }
-
           }
-
         }
-
       });
-
-
 
       return Object.values(agrupado).map(m => ({
-
         ...m,
-
         aulaFormateada: m.aulas.sort().join(" - "),
-
         horario: (m.horaInicio !== null && m.horaFin !== null)
-
           ? `${minutosAHHMM(m.horaInicio)} - ${minutosAHHMM(m.horaFin)}`
-
           : m.horario
-
       }));
-
     }
-
-
 
     function filtrarMaterias(lista, tSelTipo, dSel, eSel, tSel) {
-
       return lista.filter(m =>
-
         (tSelTipo === "TODOS" || m.tipo === tSelTipo) &&
-
         (eSel === "TODOS" || m.edificio === eSel) &&
-
         (dSel === "TODOS" || m.dia === dSel) &&
-
         cumpleTurno(m.horario, tSel)
-
       );
-
     }
-
-
 
     function ordenarMaterias(lista) {
-
       const ordenDias = { "Lunes": 1, "Martes": 2, "Miércoles": 3, "Jueves": 4, "Viernes": 5, "Sábado": 6, "Domingo": 7 };
-
       return lista.sort((a, b) => {
-
         const dA = ordenDias[a.dia] || 99;
-
         const dB = ordenDias[b.dia] || 99;
-
         if (dA !== dB) return dA - dB;
-
         return (a.horaInicio ?? 0) - (b.horaInicio ?? 0);
-
       });
-
     }
-
-
 
     function obtenerEstiloTipo(tipo) {
-
       switch (tipo) {
-
         case "EXAMEN":
-
           return { claseAula: "aula aula-examen", claseBadge: "badge-tipo badge-examen", textoBadge: "EXAMEN" };
-
         case "CONTRACURSADA":
-
           return { claseAula: "aula aula-contracursada", claseBadge: "badge-tipo badge-contracursada", textoBadge: "CONTRACURSADA" };
-
         case "EVENTO/CAPACITACIÓN":
-
         case "EVENTO":
-
           return { claseAula: "aula aula-evento", claseBadge: "badge-tipo badge-evento", textoBadge: "EVENTO" };
-
         default:
-
           return { claseAula: "aula", claseBadge: "badge-tipo badge-clase", textoBadge: "CLASE REGULAR" };
-
       }
-
     }
-
-
 
     function renderizarFilas(tbody, materiasAgrupadas) {
-
       tbody.innerHTML = "";
 
-
-
       if (materiasAgrupadas.length === 0) {
-
         tbody.innerHTML = `<tr><td colspan="5" class="sin-resultados">No hay asignaciones para los filtros seleccionados.</td></tr>`;
-
         return;
-
       }
-
-
 
       materiasAgrupadas.forEach(m => {
-
         const estilo = obtenerEstiloTipo(m.tipo);
-
         const aulaHTML = `<span class="${estilo.claseAula}">AULA ${m.aulaFormateada}</span>`;
 
-
-
         const fila = `
-
           <tr>
-
             <td>
-
               <div class="materia-info">
-
                 <span class="materia-nombre">${m.materia}</span>
-
                 <span class="dia-subtitulo">${m.dia}</span>
-
               </div>
-
             </td>
-
             <td><span class="${estilo.claseBadge}">${estilo.textoBadge}</span></td>
-
             <td><span class="edificio-texto">${m.edificio}</span></td>
-
             <td>${aulaHTML}</td>
-
             <td><span class="horario-texto">${m.horario}</span></td>
-
           </tr>`;
-
         tbody.innerHTML += fila;
-
       });
-
     }
-
-
 
     function armarFiltroTipo(config) {
-
       const sel = document.getElementById("fTipo");
-
       const valorActual = sel.value;
-
       sel.innerHTML = `<option value="TODOS">Todas las categorías</option>`;
-
       
-
       if (config.CLASE_REGULAR !== false) sel.innerHTML += `<option value="CLASE_REGULAR">Clases Regulares</option>`;
-
       if (config.EXAMEN !== false) sel.innerHTML += `<option value="EXAMEN">Exámenes</option>`;
-
       if (config.CONTRACURSADA !== false) sel.innerHTML += `<option value="CONTRACURSADA">Contracursadas</option>`;
-
       if (config["EVENTO/CAPACITACIÓN"] !== false && config.EVENTO !== false) sel.innerHTML += `<option value="EVENTO/CAPACITACIÓN">Eventos / Capacitaciones</option>`;
 
-
-
       if ([...sel.options].some(o => o.value === valorActual)) {
-
         sel.value = valorActual;
-
       }
-
     }
 
-
-
     function renderizarUI(res) {
-
       if (!res) return;
 
-
-
       const hayAlgoHabilitado = Object.values(res.config).some(v => v === true);
-
       document.getElementById("cont-aulas").style.display = hayAlgoHabilitado ? "block" : "none";
-
       if (!hayAlgoHabilitado) return;
-
-
 
       armarFiltroTipo(res.config);
 
-
-
       const tSelTipo = document.getElementById("fTipo").value;
-
       const dSel = document.getElementById("fDia").value;
-
       const eSel = document.getElementById("fEdif").value;
-
       const tSel = document.getElementById("fTurno").value;
 
-
-
       const elemHeader = document.getElementById("txt-header");
-
       if (elemHeader) {
-
         const textoCuatri = res.cuatrimestreActivo ? ` (${res.cuatrimestreActivo}° Cuatrimestre)` : "";
-
         const textoEdificio = eSel === "TODOS" ? "" : ` - ${eSel}`;
-
         elemHeader.innerText = `Distribución de Aulas${textoCuatri}${textoEdificio}`;
-
       }
 
-
-
       const filtradas = filtrarMaterias(res.materias, tSelTipo, dSel, eSel, tSel);
-
       const agrupadas = ordenarMaterias(agruparMaterias(filtradas));
 
-
-
       renderizarFilas(document.getElementById("tabAulas"), agrupadas);
-
     }
-
-
 
     function cargar() {
-
       document.body.classList.add('updating');
 
-
-
       fetch(URL_WEB_APP)
-
         .then(response => response.json())
-
         .then(res => {
-
-          // Si vienen los edificios embebidos en el payload principal
-
-          if (res.edificios && res.edificios.length > 0) {
-
-            const sEdif = document.getElementById("fEdif");
-
-            sEdif.innerHTML = `<option value="TODOS">Todos los edificios</option>`;
-
-            res.edificios.forEach(ed => {
-
-              sEdif.innerHTML += `<option value="${ed}">${ed}</option>`;
-
-            });
-
-          }
-
-
-
           const datosProcesados = res.datos ? res.datos : res;
-
           datosCache = datosProcesados;
-
           renderizarUI(datosProcesados);
-
           document.body.classList.remove('updating');
-
         })
-
         .catch(err => {
-
           console.error("Error al cargar los datos:", err);
-
           document.body.classList.remove('updating');
-
         });
-
     }
-
-
 
     window.onload = () => {
-
       actualizarReloj();
-
       setInterval(actualizarReloj, 1000);
 
-
-
       cargar();
-
-      setInterval(cargar, 15000); // Recarga automática cada 15 segundos
-
+      setInterval(cargar, 15000);
     };
 
-
-
-function abrirModalAdmin() {
-
-    window.open("https://dge-fiunne.github.io/distribucion_aulas/admin.html", "_blank");
-
-  }
-
-
-
-    function cerrarModalAdmin() {
-
-      document.getElementById("modalAdmin").classList.remove("open");
-
+    function abrirModalAdmin() {
+      window.open("https://dge-fiunne.github.io/distribucion_aulas/admin.html", "_blank");
     }
 
-
-
-      fetch(`${URL_WEB_APP}?action=verificarAdmin&pass=${encodeURIComponent(pass)}`)
-
-        .then(response => response.json())
-
-        .then(res => {
-
-          if (res.exito) {
-
-            window.open(res.url, '_blank');
-
-            cerrarModalAdmin();
-
-          } else {
-
-            msgError.innerText = res.mensaje;
-
-            msgError.style.display = "block";
-
-          }
-
-        })
-
-        .catch(err => {
-
-          console.error("Error al verificar acceso:", err);
-
-          msgError.innerText = "Error de conexión";
-
-          msgError.style.display = "block";
-
-        });
+    function cerrarModalAdmin() {
+      document.getElementById("modalAdmin").classList.remove("open");
+    }
   </script>
 </body>
-</html> 
+</html>
