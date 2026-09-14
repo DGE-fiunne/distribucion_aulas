@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestor de Aulas | Panel Administrativo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -103,6 +105,7 @@
   .modal-overlay.open { display:flex; }
   .modal-box { background:var(--surface); border-radius:22px; padding:26px; width:100%; max-width:620px; max-height:88vh; overflow-y:auto; }
   .modal-close-x { background:var(--line-soft); border:none; color:var(--ink-soft); cursor:pointer; width:32px; height:32px; border-radius:10px; }
+  .modal-form-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
   .aula-row, .horario-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
   #campoTituloEvento { display:none; margin-bottom:12px; }
   #campoTituloEvento.visible { display:block; }
@@ -370,6 +373,23 @@ let todasLasAulas = [];
 let listaMateriasCompleta = [];
 let cuatrimestreActivo = "1";
 
+// Función auxiliar estandarizada para peticiones POST seguras a Apps Script desde GitHub Pages
+async function enviarPost(payload) {
+  try {
+    const res = await fetch(URL_API_ADMIN, {
+      method: "POST",
+      mode: "cors",
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Error en la petición POST:", err);
+    throw err;
+  }
+}
+
 function verificarPassword() {
   const pass = document.getElementById("passInput").value;
   const msgError = document.getElementById("msgErrorAuth");
@@ -412,11 +432,8 @@ function cambiarCuatrimestre() {
   document.getElementById('cuatri1-section').classList.toggle('oculto', cuatrimestreActivo !== "1");
   document.getElementById('cuatri2-section').classList.toggle('oculto', cuatrimestreActivo !== "2");
 
-  fetch(URL_API_ADMIN, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "guardarCuatri", valor: cuatrimestreActivo })
-  }).catch(err => console.error("Error al guardar cuatrimestre:", err));
+  enviarPost({ action: "guardarCuatri", valor: cuatrimestreActivo })
+    .catch(err => console.error("Error al guardar cuatrimestre:", err));
   
   renderTablas();
 }
@@ -458,11 +475,7 @@ function cargarVisibilidadDesdeSheets() {
 }
 
 function guardarVisibilidadCategoria(categoria, visible) {
-  fetch(URL_API_ADMIN, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "guardarVisibilidad", categoria, visible })
-  });
+  enviarPost({ action: "guardarVisibilidad", categoria, visible });
 }
 
 function agruparPorClave(registros) {
@@ -472,7 +485,7 @@ function agruparPorClave(registros) {
     if (!grupos[clave]) {
       grupos[clave] = {
         ids: [], dia: item.dia, materia: item.materia, edificio: item.edificio,
-        cuatrimestre: item.cuatrimestre, aulas: new Set(), horarios: []
+        cuatrimestre: item.cuatrimestre, carrera: item.carrera, aulas: new Set(), horarios: []
       };
     }
     grupos[clave].ids.push(item.id);
@@ -491,6 +504,8 @@ function filaVacia(texto) {
 function crearFila(grupo) {
   const aulasTexto = [...grupo.aulas].join(" - ");
   const horariosTexto = grupo.horarios.join("<br>");
+  const idsParam = grupo.ids.join(",");
+  
   return `<tr>
     <td>${grupo.dia}</td>
     <td><b>${grupo.materia || ""}</b></td>
@@ -498,8 +513,8 @@ function crearFila(grupo) {
     <td style="font-family:var(--font-mono); font-size:12px;">${horariosTexto}</td>
     <td>${grupo.edificio}</td>
     <td>
-      <button class="btn btn-edit" onclick="prepararEdicion('${grupo.ids[0]}')">✏️</button>
-      <button class="btn btn-del" onclick="eliminarGrupo('${grupo.ids.join("','")}')">✕</button>
+      <button class="btn btn-edit" onclick="prepararEdicion('${idsParam}')">✏️</button>
+      <button class="btn btn-del" onclick="eliminarGrupo('${idsParam}')">✕</button>
     </td>
   </tr>`;
 }
@@ -626,7 +641,8 @@ function actualizarDatos() {
     .then(res => {
       todasLasAulas = res || [];
       renderTablas();
-    });
+    })
+    .catch(err => console.error("Error al obtener aulas:", err));
 }
 
 function filtrarItemPorFiltros(item, fDia, fCar, fEdif) {
@@ -647,7 +663,14 @@ function filtrarItemPorFiltros(item, fDia, fCar, fEdif) {
 }
 
 function renderTablas() {
-  if (!todasLasAulas.length) return;
+  if (!todasLasAulas.length) {
+    document.getElementById('tablaCuatri1').innerHTML = filaVacia("Sin asignaciones");
+    document.getElementById('tablaCuatri2').innerHTML = filaVacia("Sin asignaciones");
+    document.getElementById('tablaExamenes').innerHTML = filaVacia("Sin exámenes");
+    document.getElementById('tablaContracursadas').innerHTML = filaVacia("Sin contracursadas");
+    document.getElementById('tablaEventos').innerHTML = filaVacia("Sin eventos");
+    return;
+  }
 
   const fDiaCR = document.getElementById('filter-dia-CLASE_REGULAR')?.value || "TODOS";
   const fCarCR = document.getElementById('filter-carrera-CLASE_REGULAR')?.value || "TODOS";
@@ -693,12 +716,13 @@ function renderTablas() {
   document.getElementById('tablaEventos').innerHTML = ev.length ? ev.map(crearFila).join("") : filaVacia("Sin eventos");
 }
 
-function prepararEdicion(id) {
-  id = String(id).trim();
-  const base = todasLasAulas.find(x => String(x.id).trim() === id);
+function prepararEdicion(idsStr) {
+  const listaIds = String(idsStr).split(",");
+  const base = todasLasAulas.find(x => String(x.id).trim() === listaIds[0].trim());
   if (!base) return alert("Registro no encontrado");
 
-  document.getElementById('idEditar').value = base.id;
+  // Guardamos todos los IDs agrupados para borrar/reemplazar el bloque completo en Apps Script
+  document.getElementById('idEditar').value = idsStr;
   document.getElementById('dia').value = base.dia;
   
   let catForm = base.categoria;
@@ -711,15 +735,21 @@ function prepararEdicion(id) {
     document.getElementById('cuatrimestre').value = base.cuatrimestre || "1";
   }
 
+  const selectCarrera = document.getElementById('carrera');
+  if (selectCarrera && base.carrera) {
+    selectCarrera.value = base.carrera;
+  }
+
   if (base.categoria.startsWith("EVENTO")) {
     document.getElementById('tituloEvento').value = base.materia;
   } else {
+    actualizarCamposSegunCategoria();
     setTimeout(() => {
       document.getElementById('materia').value = base.materia;
     }, 50);
   }
 
-  // Cargar Aulas limpiamente
+  // Cargar Aulas
   const contenedorAulas = document.getElementById('cont-aulas');
   contenedorAulas.innerHTML = `<label class="field-label">Aula(s)</label>`;
 
@@ -737,28 +767,25 @@ function prepararEdicion(id) {
     contenedorAulas.appendChild(div);
   });
 
-  // Cargar Horarios limpiamente
+  // Cargar Horarios agrupando todas las filas coincidentes
   const contenedorHorarios = document.getElementById('cont-horarios');
   contenedorHorarios.innerHTML = "";
 
-  let textoInicio = base.horarioInicio || "";
-  let textoFin = base.horarioFin || "";
-  let listaInicio = textoInicio.includes(" | ") ? textoInicio.split(" | ") : (textoInicio.trim() ? [textoInicio] : [""]);
-  let listaFin = textoFin.includes(" | ") ? textoFin.split(" | ") : (textoFin.trim() ? [textoFin] : [""]);
-
-  const maxFilas = Math.max(listaInicio.length, listaFin.length);
-  for (let i = 0; i < maxFilas; i++) {
-    const hi = (listaInicio[i] || "").trim();
-    const hf = (listaFin[i] || "").trim();
+  const registrosDelGrupo = todasLasAulas.filter(x => listaIds.includes(String(x.id).trim()));
+  
+  registrosDelGrupo.forEach((reg, idx) => {
     const divH = document.createElement('div');
     divH.className = 'horario-row';
-    if (i === 0) {
+    const hi = reg.horarioInicio || "";
+    const hf = reg.horarioFin || "";
+    
+    if (idx === 0) {
       divH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;"><span>-</span><input type="time" class="horario-fin" value="${hf}" style="flex:1;"><button class="btn" onclick="addHorario()">+ Horario</button>`;
     } else {
       divH.innerHTML = `<input type="time" class="horario-inicio" value="${hi}" style="flex:1;"><span>-</span><input type="time" class="horario-fin" value="${hf}" style="flex:1;"><button class="btn btn-del" onclick="this.parentElement.remove()">✕</button>`;
     }
     contenedorHorarios.appendChild(divH);
-  }
+  });
 
   actualizarCamposSegunCategoria();
   document.getElementById('modalFormTitulo').innerText = 'Editar Asignación';
@@ -773,6 +800,7 @@ function guardar() {
   
   const edificio = document.getElementById('edificio').value;
   const cuatrimestre = document.getElementById('cuatrimestre') ? document.getElementById('cuatrimestre').value : "1";
+  const carrera = document.getElementById('carrera') ? document.getElementById('carrera').value : "";
   
   let materia = (categoria.startsWith("EVENTO")) ? document.getElementById('tituloEvento').value.trim() : document.getElementById('materia').value;
   if (!materia) return alert("Escribí o seleccioná una materia/evento");
@@ -794,33 +822,33 @@ function guardar() {
     action: "guardarMateria",
     id, dia, materia, edificio, aulas,
     horarios: listaHorarios,
-    categoria, colores: [], esOcupada: false, cuatrimestre
+    categoria, carrera: (carrera === "TODAS" ? "" : carrera),
+    colores: [], esOcupada: false, cuatrimestre
   };
 
-  fetch(URL_API_ADMIN, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(() => {
-    actualizarDatos();
-    cerrarModalForm();
-    alert("✅ Guardado correctamente");
-  })
-  .catch(err => alert("Error al guardar: " + err));
+  enviarPost(payload)
+    .then(res => {
+      if (res.exito || res.res) {
+        actualizarDatos();
+        cerrarModalForm();
+        alert("✅ Guardado correctamente");
+      } else {
+        alert("Error al guardar: " + (res.mensaje || res.error || "Desconocido"));
+      }
+    })
+    .catch(err => alert("Error de red al guardar: " + err));
 }
 
-function eliminarGrupo(ids) {
+function eliminarGrupo(idsStr) {
   if (!confirm("¿Eliminar registro(s)?")) return;
-  const listaIds = String(ids).split(",");
-  fetch(URL_API_ADMIN, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ action: "eliminarMateria", ids: listaIds })
-  })
-  .then(res => res.json())
-  .then(() => actualizarDatos());
+  const listaIds = String(idsStr).split(",").map(id => id.trim()).filter(Boolean);
+  
+  enviarPost({ action: "eliminarMateria", ids: listaIds })
+    .then(res => {
+      actualizarDatos();
+      alert("✅ Registros eliminados correctamente");
+    })
+    .catch(err => alert("Error al eliminar: " + err));
 }
 </script>
 </body>
