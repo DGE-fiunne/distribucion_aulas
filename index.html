@@ -413,15 +413,14 @@
       <div class="panel-seccion">
         <div class="filter-group">
           <label>Categoría</label>
-          <select id="fTipo" onchange="renderizarUI(datosCache)">
+          <select id="fTipo">
             <option value="TODOS">Todas las categorías</option>
           </select>
         </div>
 
-        <!-- FILTRO DE DÍAS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
           <label>Día</label>
-          <select id="fDia" onchange="renderizarUI(datosCache)">
+          <select id="fDia">
             <option value="TODOS">Todos los días</option>
             <option value="Lunes">Lunes</option>
             <option value="Martes">Martes</option>
@@ -432,22 +431,18 @@
           </select>
         </div>
 
-        <!-- FILTRO DE EDIFICIOS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
           <label>Edificio</label>
-          <select id="fEdif" onchange="renderizarUI(datosCache)">
+          <select id="fEdif">
             <option value="TODOS">Todos los edificios</option>
-            <!-- Puedes reemplazar o agregar los nombres de tus edificios aquí -->
             <option value="Central - Av. Las Heras">Central - Av. Las Heras</option>
             <option value="Electromecánica - Av. Castelli">Electromecánica - Av. Castelli</option>
-          
           </select>
         </div>
 
-        <!-- FILTRO DE TURNOS (HARDCODEADO EN CÓDIGO) -->
         <div class="filter-group">
           <label>Turno</label>
-          <select id="fTurno" onchange="renderizarUI(datosCache)">
+          <select id="fTurno">
             <option value="TODOS">Todos los turnos</option>
             <option value="MAÑANA">Mañana</option>
             <option value="TARDE">Tarde / Noche </option>
@@ -473,26 +468,27 @@
     </div>
   </div>
 
-  <!-- MODAL DE CONTRASEÑA -->
   <div id="modalAdmin" class="modal-overlay">
     <div class="modal-box">
       <h3>⚙️ Acceso Administrador</h3>
       <p>Ingresá la contraseña para acceder al panel de gestión.</p>
       
-      <input type="password" id="passAdminInput" placeholder="Contraseña..." onkeydown="if(event.key==='Enter') validarYRedirigirAdmin()">
+      <input type="password" id="passAdminInput" placeholder="Contraseña..." onkeydown="if(event.key==='Enter') abrirModalAdmin()">
       <div id="msgErrorAdmin">Contraseña incorrecta</div>
       
       <div class="modal-buttons">
         <button class="btn-modal btn-modal-cancel" onclick="cerrarModalAdmin()">Cancelar</button>
-        <button class="btn-modal btn-modal-confirm" onclick="validarYRedirigirAdmin()">Ingresar</button>
+        <button class="btn-modal btn-modal-confirm" onclick="abrirModalAdmin()">Ingresar</button>
       </div>
     </div>
   </div>
 
-  <script>
-    const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbyw2mlkmGTFsncIDWvVsggsQZiNJKRi7hKQcMFBTQO0oyZGAc_NQIwlKSWXDHkboZer/exec";
+  <script type="module">
+    import { supabase } from './supabaseClient.js';
 
-    let datosCache = null;
+    let datosProcesados = [];
+    let configGlobal = {};
+    let cuatriActivoGlobal = "1";
 
     function actualizarReloj() {
       const ahora = new Date();
@@ -501,19 +497,6 @@
       let m = ahora.getMinutes().toString().padStart(2, "0");
       let s = ahora.getSeconds().toString().padStart(2, "0");
       document.getElementById("reloj").innerHTML = `${dias[ahora.getDay()]} ${h}:${m}:${s}`;
-    }
-
-    function cumpleTurno(horarioStr, turnoFiltro) {
-      if (turnoFiltro === "TODOS" || !horarioStr) return true;
-      const match = horarioStr.match(/(\d{1,2}):(\d{2})/);
-      if (!match) return false;
-      const h = parseInt(match[1]);
-      const min = parseInt(match[2]);
-      const totalMinutos = h * 60 + min;
-
-      if (turnoFiltro === "MAÑANA") return (totalMinutos >= 450 && totalMinutos <= 810);
-      if (turnoFiltro === "TARDE") return (totalMinutos > 810 && totalMinutos <= 1380);
-      return true;
     }
 
     function minutosAHHMM(min) {
@@ -530,10 +513,24 @@
       return { inicio: Math.min(...minutos), fin: Math.max(...minutos) };
     }
 
-    function agruparMaterias(lista) {
+    function cumpleTurno(horarioStr, turnoFiltro) {
+      if (turnoFiltro === "TODOS" || !horarioStr) return true;
+      const match = horarioStr.match(/(\d{1,2}):(\d{2})/);
+      if (!match) return false;
+      const h = parseInt(match[1]);
+      const min = parseInt(match[2]);
+      const totalMinutos = h * 60 + min;
+
+      if (turnoFiltro === "MAÑANA") return (totalMinutos >= 450 && totalMinutos <= 810);
+      if (turnoFiltro === "TARDE") return (totalMinutos > 810 && totalMinutos <= 1380);
+      return true;
+    }
+
+    function procesarYAgruparDatos(lista) {
       const agrupado = {};
+
       lista.forEach(item => {
-        const clave = `${item.materia}-${item.dia}-${item.edificio}-${item.tipo}`;
+        const clave = `${item.materia}-${item.dia}-${item.edificio}-${item.tipo}-${item.horario}`;
         const rango = extraerRangoHorario(item.horario);
 
         if (!agrupado[clave]) {
@@ -547,43 +544,25 @@
           if (item.aula && !agrupado[clave].aulas.includes(item.aula)) {
             agrupado[clave].aulas.push(item.aula);
           }
-          if (rango) {
-            if (agrupado[clave].horaInicio === null || rango.inicio < agrupado[clave].horaInicio) {
-              agrupado[clave].horaInicio = rango.inicio;
-            }
-            if (agrupado[clave].horaFin === null || rango.fin > agrupado[clave].horaFin) {
-              agrupado[clave].horaFin = rango.fin;
-            }
-          }
         }
       });
 
-      return Object.values(agrupado).map(m => ({
-        ...m,
-        aulaFormateada: m.aulas.sort().join(" - "),
-        horario: (m.horaInicio !== null && m.horaFin !== null)
-          ? `${minutosAHHMM(m.horaInicio)} - ${minutosAHHMM(m.horaFin)}`
-          : m.horario
-      }));
-    }
-
-    function filtrarMaterias(lista, tSelTipo, dSel, eSel, tSel) {
-      return lista.filter(m =>
-        (tSelTipo === "TODOS" || m.tipo === tSelTipo) &&
-        (eSel === "TODOS" || m.edificio === eSel) &&
-        (dSel === "TODOS" || m.dia === dSel) &&
-        cumpleTurno(m.horario, tSel)
-      );
-    }
-
-    function ordenarMaterias(lista) {
       const ordenDias = { "Lunes": 1, "Martes": 2, "Miércoles": 3, "Jueves": 4, "Viernes": 5, "Sábado": 6, "Domingo": 7 };
-      return lista.sort((a, b) => {
-        const dA = ordenDias[a.dia] || 99;
-        const dB = ordenDias[b.dia] || 99;
-        if (dA !== dB) return dA - dB;
-        return (a.horaInicio ?? 0) - (b.horaInicio ?? 0);
-      });
+
+      return Object.values(agrupado)
+        .map(m => ({
+          ...m,
+          aulaFormateada: m.aulas.sort().join(" - "),
+          horarioTexto: (m.horaInicio !== null && m.horaFin !== null)
+            ? `${minutosAHHMM(m.horaInicio)} - ${minutosAHHMM(m.horaFin)}`
+            : m.horario
+        }))
+        .sort((a, b) => {
+          const dA = ordenDias[a.dia] || 99;
+          const dB = ordenDias[b.dia] || 99;
+          if (dA !== dB) return dA - dB;
+          return (a.horaInicio ?? 0) - (b.horaInicio ?? 0);
+        });
     }
 
     function obtenerEstiloTipo(tipo) {
@@ -600,19 +579,59 @@
       }
     }
 
-    function renderizarFilas(tbody, materiasAgrupadas) {
-      tbody.innerHTML = "";
+    function esCategoriaVisibleEnAdmin(tipo) {
+      if (tipo === "CLASE_REGULAR") return configGlobal.CLASE_REGULAR !== false;
+      if (tipo === "EXAMEN") return configGlobal.EXAMEN !== false;
+      if (tipo === "CONTRACURSADA") return configGlobal.CONTRACURSADA !== false;
+      if (tipo.startsWith("EVENTO")) {
+        return configGlobal["EVENTO/CAPACITACIÓN"] !== false && configGlobal.EVENTO !== false;
+      }
+      return true;
+    }
 
-      if (materiasAgrupadas.length === 0) {
+    function aplicarFiltros() {
+      const tSelTipo = document.getElementById("fTipo").value;
+      const dSel = document.getElementById("fDia").value;
+      const eSel = document.getElementById("fEdif").value;
+      const tSel = document.getElementById("fTurno").value;
+
+      const elemHeader = document.getElementById("txt-header");
+      if (elemHeader) {
+        const textoCuatri = cuatriActivoGlobal ? ` (${cuatriActivoGlobal}° Cuatrimestre)` : "";
+        const textoEdificio = eSel === "TODOS" ? "" : ` - ${eSel}`;
+        elemHeader.innerText = `Distribución de Aulas${textoCuatri}${textoEdificio}`;
+      }
+
+      // ✅ FILTRADO INTEGRO: EVALÚA VISIBILIDAD ADMIN, CUATRIMESTRE Y FILTROS DEL USUARIO
+      const filtradas = datosProcesados.filter(m => {
+        // 1. Ocultar inmediatamente si el administrador apagó el interruptor
+        if (!esCategoriaVisibleEnAdmin(m.tipo)) return false;
+
+        // 2. Filtros elegidos por el usuario en pantalla
+        const cumpleTipo = (tSelTipo === "TODOS" || m.tipo === tSelTipo);
+        const cumpleEdif = (eSel === "TODOS" || m.edificio === eSel);
+        const cumpleDia  = (dSel === "TODOS" || m.dia === dSel);
+        const cumpleTur  = cumpleTurno(m.horario, tSel);
+
+        // 3. Cuatrimestre solo evaluado para Clases Regulares
+        let cumpleCuatri = true;
+        if (m.tipo === "CLASE_REGULAR") {
+          cumpleCuatri = (!m.cuatrimestre || String(m.cuatrimestre) === String(cuatriActivoGlobal));
+        }
+
+        return cumpleTipo && cumpleEdif && cumpleDia && cumpleTur && cumpleCuatri;
+      });
+
+      const tbody = document.getElementById("tabAulas");
+
+      if (filtradas.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="sin-resultados">No hay asignaciones para los filtros seleccionados.</td></tr>`;
         return;
       }
 
-      materiasAgrupadas.forEach(m => {
+      const html = filtradas.map(m => {
         const estilo = obtenerEstiloTipo(m.tipo);
-        const aulaHTML = `<span class="${estilo.claseAula}">AULA ${m.aulaFormateada}</span>`;
-
-        const fila = `
+        return `
           <tr>
             <td>
               <div class="materia-info">
@@ -622,71 +641,95 @@
             </td>
             <td><span class="${estilo.claseBadge}">${estilo.textoBadge}</span></td>
             <td><span class="edificio-texto">${m.edificio}</span></td>
-            <td>${aulaHTML}</td>
-            <td><span class="horario-texto">${m.horario}</span></td>
+            <td><span class="${estilo.claseAula}">AULA ${m.aulaFormateada}</span></td>
+            <td><span class="horario-texto">${m.horarioTexto}</span></td>
           </tr>`;
-        tbody.innerHTML += fila;
-      });
+      }).join("");
+
+      tbody.innerHTML = html;
     }
 
+    // ✅ REGENERA EL DESPLEGABLE MOSTRANDO SOLAMENTE CATEGORÍAS ACTIVAS
     function armarFiltroTipo(config) {
       const sel = document.getElementById("fTipo");
-      const valorActual = sel.value;
+      const valAnt = sel.value;
+
       sel.innerHTML = `<option value="TODOS">Todas las categorías</option>`;
-      
       if (config.CLASE_REGULAR !== false) sel.innerHTML += `<option value="CLASE_REGULAR">Clases Regulares</option>`;
       if (config.EXAMEN !== false) sel.innerHTML += `<option value="EXAMEN">Exámenes</option>`;
       if (config.CONTRACURSADA !== false) sel.innerHTML += `<option value="CONTRACURSADA">Contracursadas</option>`;
       if (config["EVENTO/CAPACITACIÓN"] !== false && config.EVENTO !== false) sel.innerHTML += `<option value="EVENTO/CAPACITACIÓN">Eventos / Capacitaciones</option>`;
 
-      if ([...sel.options].some(o => o.value === valorActual)) {
-        sel.value = valorActual;
+      if ([...sel.options].some(o => o.value === valAnt)) {
+        sel.value = valAnt;
+      } else {
+        sel.value = "TODOS";
       }
     }
 
-    function renderizarUI(res) {
-      if (!res) return;
-
-      const hayAlgoHabilitado = Object.values(res.config).some(v => v === true);
-      document.getElementById("cont-aulas").style.display = hayAlgoHabilitado ? "block" : "none";
-      if (!hayAlgoHabilitado) return;
-
-      armarFiltroTipo(res.config);
-
-      const tSelTipo = document.getElementById("fTipo").value;
-      const dSel = document.getElementById("fDia").value;
-      const eSel = document.getElementById("fEdif").value;
-      const tSel = document.getElementById("fTurno").value;
-
-      const elemHeader = document.getElementById("txt-header");
-      if (elemHeader) {
-        const textoCuatri = res.cuatrimestreActivo ? ` (${res.cuatrimestreActivo}° Cuatrimestre)` : "";
-        const textoEdificio = eSel === "TODOS" ? "" : ` - ${eSel}`;
-        elemHeader.innerText = `Distribución de Aulas${textoCuatri}${textoEdificio}`;
-      }
-
-      const filtradas = filtrarMaterias(res.materias, tSelTipo, dSel, eSel, tSel);
-      const agrupadas = ordenarMaterias(agruparMaterias(filtradas));
-
-      renderizarFilas(document.getElementById("tabAulas"), agrupadas);
-    }
-
-    function cargar() {
+    async function cargar() {
       document.body.classList.add('updating');
 
-      fetch(URL_WEB_APP)
-        .then(response => response.json())
-        .then(res => {
-          const datosProcesados = res.datos ? res.datos : res;
-          datosCache = datosProcesados;
-          renderizarUI(datosProcesados);
-          document.body.classList.remove('updating');
-        })
-        .catch(err => {
-          console.error("Error al cargar los datos:", err);
-          document.body.classList.remove('updating');
-        });
+      try {
+        const { data: materiasData, error: errMaterias } = await supabase
+          .from('distribucion_aulas')
+          .select(`
+            *,
+            materias (nombre),
+            edificios (nombre)
+          `);
+
+        if (errMaterias) throw errMaterias;
+
+        const { data: configCatData } = await supabase.from('config_categorias').select('*');
+        const { data: varData } = await supabase.from('variables_globales').select('valor').eq('clave', 'cuatrimestre_activo').maybeSingle();
+
+        configGlobal = {};
+        if (configCatData) {
+          configCatData.forEach(row => {
+            configGlobal[row.categoria] = row.visible === true || String(row.visible).toLowerCase() === 'true';
+          });
+        }
+
+        cuatriActivoGlobal = varData ? String(varData.valor) : "1";
+
+        const materiasMapeadas = (materiasData || []).map(m => ({
+          id: m.id,
+          dia: m.dia,
+          materia: m.materias ? m.materias.nombre : (m.materia || 'Evento/Capacitación'),
+          edificio: m.edificios ? m.edificios.nombre : '',
+          aula: m.aula,
+          horario: m.horario || `${m.horario_inicio || ''} - ${m.horario_fin || ''}`,
+          tipo: m.categoria,
+          cuatrimestre: m.cuatrimestre
+        }));
+
+        datosProcesados = procesarYAgruparDatos(materiasMapeadas);
+
+        const hayAlgoHabilitado = Object.values(configGlobal).some(v => v === true);
+        document.getElementById("cont-aulas").style.display = hayAlgoHabilitado ? "block" : "none";
+
+        if (hayAlgoHabilitado) {
+          armarFiltroTipo(configGlobal);
+          aplicarFiltros();
+        }
+      } catch (err) {
+        console.error("Error al cargar los datos desde Supabase:", err);
+      } finally {
+        document.body.classList.remove('updating');
+      }
     }
+
+    function abrirModalAdmin() { window.open("./admin.html", "_blank"); }
+    function cerrarModalAdmin() { document.getElementById("modalAdmin").classList.remove("open"); }
+
+    document.getElementById("fTipo").addEventListener("change", aplicarFiltros);
+    document.getElementById("fDia").addEventListener("change", aplicarFiltros);
+    document.getElementById("fEdif").addEventListener("change", aplicarFiltros);
+    document.getElementById("fTurno").addEventListener("change", aplicarFiltros);
+
+    window.abrirModalAdmin = abrirModalAdmin;
+    window.cerrarModalAdmin = cerrarModalAdmin;
 
     window.onload = () => {
       actualizarReloj();
@@ -695,14 +738,6 @@
       cargar();
       setInterval(cargar, 15000);
     };
-
-    function abrirModalAdmin() {
-      window.open("https://dge-fiunne.github.io/distribucion_aulas/admin.html", "_blank");
-    }
-
-    function cerrarModalAdmin() {
-      document.getElementById("modalAdmin").classList.remove("open");
-    }
   </script>
 </body>
 </html>
